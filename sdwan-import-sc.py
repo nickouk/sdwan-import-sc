@@ -34,6 +34,7 @@ import sys
 import re
 import math
 import pickle
+import json
 
 
 def postcode_api(postcode_apilist):
@@ -124,7 +125,7 @@ tracker_sheet_obj = tracker_wb_obj.active
 max_row = tracker_sheet_obj.max_row
 
 # initialise some variables
-keys = ['Device ID', 'System IP', 'Host Name', 'Site Id', 'Dual Stack IPv6 Default', 'Rollback Timer (sec)', 'basic_gpsl_longitude', 'basic_gpsl_latitude', 'provision_port_disable', 'vlan31_vrrp_pri', 'vlan31_vrrp_ipv4', 'vlan31_ipv4', 'vlan31_mask', 'vlan31_dhcp_net', 'vlan31_dhcp_mask', 'vlan31_dhcp_exclude', 'vlan31_dhcp_gateway', 'vlan120_vrrp_pri', 'vlan120_vrrp_ipv4', 'vlan120_ipv4', 'vlan120_mask', 'vlan120_dhcp_exclude', 'vlan100_vrrp_pri', 'vlan100_vrrp_ipv4', 'vlan100_ipv4', 'vlan100_mask', 'dhcp_6_basicConf_exclude', 'vlan40_vrrp_pri', 'vlan40_vrrp_ipv4', 'vlan40_ipv4', 'vlan40_mask', 'vlan40_dhcp_exclude', 'vlan30_vrrp_pri', 'vlan30_vrrp_ipv4', 'vlan30_ipv4', 'vlan30_mask', 'vlan30_dhcp_exclude', 'lan_vpn_100_nat_1_rangeStart', 'lan_vpn_100_nat_1_rangeEnd', 'lan_vpn_100_staticNat_1_translatedSourceIp', 'lan_vpn_100_staticNat_2_translatedSourceIp', 'loopback0_ipv4', 'loopback0_mask', 'vlan20_vrrp_pri', 'vlan20_vrrp_ipv4', 'vlan20_ipv4', 'vlan20_mask', 'vlan20_dhcp_net', 'vlan20_dhcp_mask', 'vlan20_dhcp_exclude', 'vlan20_dhcp_gateway', 'vlan10_vrrp_pri', 'vlan10_vrrp_ipv4', 'vlan10_ipv4', 'vlan10_mask', 'vlan10_dhcp_net', 'vlan10_dhcp_mask', 'vlan10_dhcp_exclude', 'vlan10_dhcp_gateway', 'vlan2_vrrp_pri', 'vlan2_vrrp_ipv4', 'vlan2_ipv4', 'vlan2_mask', 'vlan2_dhcp_net', 'vlan2_dhcp_mask', 'vlan2_dhcp_exclude', 'vlan2_dhcp_gateway', 'vlan80_vrrp_pri', 'vlan80_vrrp_ipv4', 'vlan80_ipv4', 'vlan80_mask', 'vlan70_vrrp_pri', 'vlan70_vrrp_ipv4', 'vlan70_ipv4', 'vlan70_mask', 'vlan60_vrrp_pri', 'vlan60_vrrp_ipv4', 'vlan60_ipv4', 'vlan60_mask', 'tloc_next_hop', 'tloc_bandwidth_up', 'tloc_bandwidth_down', 'wan_bandwidth_up', 'wan_bandwidth_down', 'wan_desc', 'ethpppoe_chapHost', 'ethpppoe_chapPwd', 'wan_color', 'ethpppoe_ipsecPrefer', 'wan_shapingRate', 'wan_track_addr']
+keys = ['Device ID', 'System IP', 'Host Name', 'Site Id', 'Dual Stack IPv6 Default', 'Rollback Timer (sec)', 'basic_gpsl_longitude', 'basic_gpsl_latitude', 'provision_port_disable', 'vlan31_vrrp_pri', 'vlan31_vrrp_ipv4', 'vlan31_ipv4', 'vlan31_mask', 'vlan31_dhcp_net', 'vlan31_dhcp_mask', 'vlan31_dhcp_exclude', 'vlan31_dhcp_gateway', 'vlan120_vrrp_pri', 'vlan120_vrrp_ipv4', 'vlan120_ipv4', 'vlan120_mask', 'vlan120_dhcp_exclude', 'vlan100_vrrp_pri', 'vlan100_vrrp_ipv4', 'vlan100_ipv4', 'vlan100_mask', 'vlan100_dhcp_exclude', 'vlan40_vrrp_pri', 'vlan40_vrrp_ipv4', 'vlan40_ipv4', 'vlan40_mask', 'vlan40_dhcp_exclude', 'vlan30_vrrp_pri', 'vlan30_vrrp_ipv4', 'vlan30_ipv4', 'vlan30_mask', 'vlan30_dhcp_exclude', 'lan_vpn_100_nat_1_rangeStart', 'lan_vpn_100_nat_1_rangeEnd', 'lan_vpn_100_staticNat_1_translatedSourceIp', 'lan_vpn_100_staticNat_2_translatedSourceIp', 'loopback0_ipv4', 'loopback0_mask', 'vlan20_vrrp_pri', 'vlan20_vrrp_ipv4', 'vlan20_ipv4', 'vlan20_mask', 'vlan20_dhcp_net', 'vlan20_dhcp_mask', 'vlan20_dhcp_exclude', 'vlan20_dhcp_gateway', 'vlan10_vrrp_pri', 'vlan10_vrrp_ipv4', 'vlan10_ipv4', 'vlan10_mask', 'vlan10_dhcp_net', 'vlan10_dhcp_mask', 'vlan10_dhcp_exclude', 'vlan10_dhcp_gateway', 'vlan2_vrrp_pri', 'vlan2_vrrp_ipv4', 'vlan2_ipv4', 'vlan2_mask', 'vlan2_dhcp_net', 'vlan2_dhcp_mask', 'vlan2_dhcp_exclude', 'vlan2_dhcp_gateway', 'vlan80_vrrp_pri', 'vlan80_vrrp_ipv4', 'vlan80_ipv4', 'vlan80_mask', 'vlan70_vrrp_pri', 'vlan70_vrrp_ipv4', 'vlan70_ipv4', 'vlan70_mask', 'vlan60_vrrp_pri', 'vlan60_vrrp_ipv4', 'vlan60_ipv4', 'vlan60_mask', 'tloc_next_hop', 'tloc_bandwidth_up', 'tloc_bandwidth_down', 'wan_bandwidth_up', 'wan_bandwidth_down', 'wan_desc', 'ethpppoe_chapHost', 'ethpppoe_chapPwd', 'wan_color', 'ethpppoe_ipsecPrefer', 'wan_shapingRate', 'wan_track_addr']
 
 vmanage_dict = {key: [] for key in keys}
 
@@ -222,9 +223,12 @@ while tracker_row <= max_row:
         circuit2_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_name_col).value)
         circuit2_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_pwd_col).value)
 
-        if circuit2_provider == "BT" and circuit2_ppp_name == "":
+        if circuit2_provider == "BT" and circuit2_ppp_name == "None":
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
+        
+        # we need to duplicate the postcode for router 2 which is not optimal but works for now
+        postcode_list.append(postcode)
 
     # get managment IP address for router 1
     router1_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=router1_mgmt_ip_col).value)
@@ -243,7 +247,7 @@ while tracker_row <= max_row:
     circuit1_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_name_col).value)
     circuit1_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_pwd_col).value)
 
-    if circuit1_provider == "BT" and circuit1_ppp_name == "":
+    if circuit1_provider == "BT" and circuit1_ppp_name == "None":
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
 
@@ -309,7 +313,7 @@ while tracker_row <= max_row:
     vmanage_dict['vlan30_ipv4'].append(str(vlan30_ipv4.network_address + 252))
     vmanage_dict['vlan30_mask'].append(str(vlan30_ipv4.netmask))
     vmanage_dict['vlan30_dhcp_exclude'].append(f'{str(vlan30_ipv4.network_address + 128)}-{str(vlan30_ipv4.network_address + 254)}')
-    vmanage_dict['lan20_vrrp_pri'].append('110')
+    vmanage_dict['vlan20_vrrp_pri'].append('110')
     vmanage_dict['vlan20_vrrp_ipv4'].append(str(vlan20_ipv4.network_address + 126))
     vmanage_dict['vlan20_ipv4'].append(str(vlan20_ipv4.network_address + 124))
     vmanage_dict['vlan20_mask'].append(str(vlan20_ipv4.netmask))
@@ -359,15 +363,74 @@ while tracker_row <= max_row:
         vmanage_dict['Dual Stack IPv6 Default'].append('FALSE')
         vmanage_dict['Rollback Timer (sec)'].append('300')
         vmanage_dict['provision_port_disable'].append('FALSE')
-        vmanage_dict['vlan31_vrrp_pri'].append('110')
+        vmanage_dict['vlan31_vrrp_pri'].append('100')
         vmanage_dict['vlan31_vrrp_ipv4'].append(str(vlan31_ipv4.network_address + 14))
         vmanage_dict['vlan31_ipv4'].append(str(vlan31_ipv4.network_address + 13))
         vmanage_dict['vlan31_mask'].append(str(vlan31_ipv4.netmask))
         vmanage_dict['vlan31_dhcp_net'].append(str(vlan31_ipv4.network_address))
         vmanage_dict['vlan31_dhcp_mask'].append(str(vlan31_ipv4.netmask))
-        vmanage_dict['vlan31_dhcp_exclude'].append(f'{str(vlan31_ipv4.network_address + 7)}-{str(vlan31_ipv4.network_address + 14)}')
+        vmanage_dict['vlan31_dhcp_exclude'].append(f'{str(vlan31_ipv4.network_address + 1)}-{str(vlan31_ipv4.network_address + 6)}";"{str(vlan31_ipv4.network_address + 12)}-{str(vlan31_ipv4.network_address + 14)}')
         vmanage_dict['vlan31_dhcp_gateway'].append(str(vlan31_ipv4.network_address + 14))
-        vmanage_dict['tloc_next_hop'].append(str('192.168.12.2'))
+        vmanage_dict['vlan120_vrrp_pri'].append('100')
+        vmanage_dict['vlan120_vrrp_ipv4'].append(str(vlan120_ipv4.network_address + 254))
+        vmanage_dict['vlan120_ipv4'].append(str(vlan120_ipv4.network_address + 253))
+        vmanage_dict['vlan120_mask'].append(str(vlan120_ipv4.netmask))
+        vmanage_dict['vlan120_dhcp_exclude'].append(f'{str(vlan120_ipv4.network_address + 1)}-{str(vlan120_ipv4.network_address + 127)}";"{str(vlan120_ipv4.network_address + 252)}-{str(vlan120_ipv4.network_address + 254)}')
+        vmanage_dict['vlan100_vrrp_pri'].append('100')
+        vmanage_dict['vlan100_vrrp_ipv4'].append(str(vlan100_ipv4.network_address + 254))
+        vmanage_dict['vlan100_ipv4'].append(str(vlan100_ipv4.network_address + 253))
+        vmanage_dict['vlan100_mask'].append(str(vlan100_ipv4.netmask))
+        vmanage_dict['vlan100_dhcp_exclude'].append(f'{str(vlan100_ipv4.network_address + 1)}-{str(vlan100_ipv4.network_address + 127)}";"{str(vlan100_ipv4.network_address + 252)}-{str(vlan100_ipv4.network_address + 254)}')
+        vmanage_dict['vlan40_vrrp_pri'].append('100')
+        vmanage_dict['vlan40_vrrp_ipv4'].append(str(vlan40_ipv4.network_address + 254))
+        vmanage_dict['vlan40_ipv4'].append(str(vlan40_ipv4.network_address + 253))
+        vmanage_dict['vlan40_mask'].append(str(vlan40_ipv4.netmask))
+        vmanage_dict['vlan40_dhcp_exclude'].append(f'{str(vlan40_ipv4.network_address + 1)}-{str(vlan40_ipv4.network_address + 127)}";"{str(vlan40_ipv4.network_address + 252)}-{str(vlan40_ipv4.network_address + 254)}')
+        vmanage_dict['vlan30_vrrp_pri'].append('100')
+        vmanage_dict['vlan30_vrrp_ipv4'].append(str(vlan30_ipv4.network_address + 254))
+        vmanage_dict['vlan30_ipv4'].append(str(vlan30_ipv4.network_address + 253))
+        vmanage_dict['vlan30_mask'].append(str(vlan30_ipv4.netmask))
+        vmanage_dict['vlan30_dhcp_exclude'].append(f'{str(vlan30_ipv4.network_address + 1)}-{str(vlan30_ipv4.network_address + 127)}";"{str(vlan30_ipv4.network_address + 252)}-{str(vlan30_ipv4.network_address + 254)}')
+        vmanage_dict['vlan20_vrrp_pri'].append('100')
+        vmanage_dict['vlan20_vrrp_ipv4'].append(str(vlan20_ipv4.network_address + 126))
+        vmanage_dict['vlan20_ipv4'].append(str(vlan20_ipv4.network_address + 125))
+        vmanage_dict['vlan20_mask'].append(str(vlan20_ipv4.netmask))
+        vmanage_dict['vlan20_dhcp_net'].append(str(vlan20_ipv4.network_address))
+        vmanage_dict['vlan20_dhcp_mask'].append(str(vlan20_ipv4.netmask))
+        vmanage_dict['vlan20_dhcp_exclude'].append(f'{str(vlan20_ipv4.network_address + 1)}-{str(vlan20_ipv4.network_address + 63)}";"{str(vlan20_ipv4.network_address + 124)}-{str(vlan20_ipv4.network_address + 126)}')
+        vmanage_dict['vlan20_dhcp_gateway'].append(str(vlan20_ipv4.network_address + 126))
+        vmanage_dict['vlan10_vrrp_pri'].append('100')
+        vmanage_dict['vlan10_vrrp_ipv4'].append(str(vlan10_ipv4.network_address + 126))
+        vmanage_dict['vlan10_ipv4'].append(str(vlan10_ipv4.network_address + 125))
+        vmanage_dict['vlan10_mask'].append(str(vlan10_ipv4.netmask))
+        vmanage_dict['vlan10_dhcp_net'].append(str(vlan10_ipv4.network_address))
+        vmanage_dict['vlan10_dhcp_mask'].append(str(vlan10_ipv4.netmask))
+        vmanage_dict['vlan10_dhcp_exclude'].append(f'{str(vlan10_ipv4.network_address + 1)}-{str(vlan10_ipv4.network_address + 63)}";"{str(vlan10_ipv4.network_address + 124)}-{str(vlan10_ipv4.network_address + 126)}')
+        vmanage_dict['vlan10_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 126))
+        vmanage_dict['vlan60_vrrp_pri'].append('100')
+        vmanage_dict['vlan60_vrrp_ipv4'].append(str(vlan60_ipv4.network_address + 254))
+        vmanage_dict['vlan60_ipv4'].append(str(vlan60_ipv4.network_address + 253))
+        vmanage_dict['vlan60_mask'].append(str(vlan60_ipv4.netmask))
+        vmanage_dict['vlan70_vrrp_pri'].append('100')
+        vmanage_dict['vlan70_vrrp_ipv4'].append(str(vlan70_ipv4.network_address + 254))
+        vmanage_dict['vlan70_ipv4'].append(str(vlan70_ipv4.network_address + 253))
+        vmanage_dict['vlan70_mask'].append(str(vlan70_ipv4.netmask))
+        vmanage_dict['vlan80_vrrp_pri'].append('100')
+        vmanage_dict['vlan80_vrrp_ipv4'].append(str(vlan80_ipv4.network_address + 254))
+        vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 253))
+        vmanage_dict['vlan80_mask'].append(str(vlan80_ipv4.netmask))
+        vmanage_dict['tloc_next_hop'].append(str('192.168.21.1'))
+        vmanage_dict['tloc_bandwidth_up'].append(str(circuit2_bw_up * 100))
+        vmanage_dict['tloc_bandwidth_down'].append(str(circuit2_bw_down * 100))
+        vmanage_dict['wan_bandwidth_up'].append(str(circuit2_bw_up * 100))
+        vmanage_dict['wan_bandwidth_down'].append(str(circuit2_bw_down * 100))
+        vmanage_dict['wan_desc'].append(f'{circuit2_ref} - {circuit2_type} via {circuit2_provider}')
+        vmanage_dict['ethpppoe_chapHost'].append(circuit2_ppp_name)
+        vmanage_dict['ethpppoe_chapPwd'].append(circuit2_ppp_pwd)
+        vmanage_dict['wan_color'].append(router2_wan_color)
+        vmanage_dict['ethpppoe_ipsecPrefer'].append('0')
+        vmanage_dict['wan_shapingRate'].append(circuit2_bw_up * 100)
+        vmanage_dict['wan_track_addr'].append('8.8.8.8')
 
     tracker_row = tracker_row + 1
 
@@ -399,3 +462,14 @@ if len(postcode_list) > 0:
 # update the csv dictionary with the lat and long values returned by the API
 vmanage_dict['basic_gpsl_latitude'] = latlist
 vmanage_dict['basic_gpsl_longitude'] = longlist
+
+print(json.dumps(vmanage_dict, indent=1))
+
+# create the dataframe from the dictionary we built
+df = pd.DataFrame(vmanage_dict)
+
+# write the dataframe to a csv ready for import into vManage
+df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
+
+# all done
+print('\nvmanage-import-sc.csv has been created :)\n')
