@@ -129,6 +129,7 @@ keys = ['Device ID', 'System IP', 'Host Name', 'Site Id', 'Dual Stack IPv6 Defau
 
 vmanage_dict = {key: [] for key in keys}
 
+# define column numbers for the tracker sheet (1 = column A) - this makes it easier to modify later if the tracker sheet changes
 store_num_col = 1  # column A
 store_type_col = 2  # column B
 postcode_col = 4  # column D
@@ -223,7 +224,7 @@ while tracker_row <= max_row:
         circuit2_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_name_col).value)
         circuit2_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_pwd_col).value)
 
-        if circuit2_provider == "BT" and circuit2_ppp_name == "None":
+        if circuit2_provider == 'BT' and circuit2_ppp_name == 'None':
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
         
@@ -247,7 +248,7 @@ while tracker_row <= max_row:
     circuit1_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_name_col).value)
     circuit1_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_pwd_col).value)
 
-    if circuit1_provider == "BT" and circuit1_ppp_name == "None":
+    if circuit1_provider == 'BT' and circuit1_ppp_name == 'None':
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
 
