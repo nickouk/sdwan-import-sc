@@ -132,34 +132,62 @@ while tracker_row <= max_row:
         tracker_row = tracker_row + 1
         continue
 
+    # get the store type
+    store_type = str(tracker_sheet_obj.cell(row=tracker_row, column=2).value).upper()
+    print(store_type)
+    store_type = int(store_type[0])  # first character only
+    site_id = f'{store_type}{store_num}'
+    print(f'Processing Site ID {site_id} ...')
+
     # get the postcode
-    postcode = str(tracker_sheet_obj.cell(row=tracker_row, column=3).value).upper().replace(' ', '')
+    postcode = str(tracker_sheet_obj.cell(row=tracker_row, column=4).value).upper().replace(' ', '')
     postcode_list.append(postcode)
 
     # get router 1 serial number
-    router1_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=4).value).upper()
+    router1_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=5).value).upper()
     router1_serial = sanatise_serial(router1_serial)
 
     # get circuit 1 type and bandwidth
-    circuit1_type = str(tracker_sheet_obj.cell(row=tracker_row, column=6).value).upper()
+    circuit1_type = str(tracker_sheet_obj.cell(row=tracker_row, column=7).value).upper()
     circuit1_bw_down, circuit1_bw_up = circuit_bandwidth(circuit1_type)
 
-    # get router 2 serial number
-    router2_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=11).value).upper()
-    router2_serial = sanatise_serial(router2_serial)
+    # initialize router 2 variables in case of a single site router
+    router2_serial = 'NONE'
+    circuit2_type = 'NONE'
+    circuit2_bw_down = 0
+    circuit2_bw_up = 0
+    circuit2_type = 'NONE'
+    router2_mgmt_ip = 'NONE'
+    router2_systemip = 'NONE'
 
-    # get circuit 2 type and bandwidth
-    circuit2_type = str(tracker_sheet_obj.cell(row=tracker_row, column=13).value).upper()
-    circuit2_bw_down, circuit2_bw_up = circuit_bandwidth(circuit2_type)
+    # get router 2 serial number if present otherwsie assume a singe router site
+    router2_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=12).value).upper()
+    if router2_serial != 'NONE':
+        router2_serial = sanatise_serial(router2_serial)
 
+        # get circuit 2 type and bandwidth
+        circuit2_type = str(tracker_sheet_obj.cell(row=tracker_row, column=14).value).upper()
+        circuit2_bw_down, circuit2_bw_up = circuit_bandwidth(circuit2_type)
+
+        # get managment IP address for router 2
+        router2_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=13).value)
+        if '/' not in router2_mgmt_ip: router2_mgmt_ip = router2_mgmt_ip + '/32'
+        router2_mgmt_ip = ipaddress.ip_network(router2_mgmt_ip, strict=False)
+        router2_systemip = router2_mgmt_ip.network_address
+
+    # get managment IP address for router 1
+    router1_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=6).value)
+    if '/' not in router1_mgmt_ip: router1_mgmt_ip = router1_mgmt_ip + '/32'
+    router1_mgmt_ip = ipaddress.ip_network(router1_mgmt_ip, strict=False)
+    router1_systemip = router1_mgmt_ip.network_address
+    
     # generate store networks from store number
-    print(store_num)
     store_net_oct2 = store_num[0:2]
     if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
         store_net_oct2 = store_net_oct2[1:]
 
     store_net_oct2 = int(store_net_oct2)
-    store_net_oct3 = int(store_num[2:3])
+    store_net_oct3 = int(store_num[2:4])
 
     vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
     vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2}.{store_net_oct3}.0/24')
@@ -173,25 +201,5 @@ while tracker_row <= max_row:
     vlan100_ipv4 = ipaddress.ip_network(f'192.168.103.0/24')
     vlan120_ipv4 = ipaddress.ip_network(f'192.168.104.0/24')
 
-    print("Store number: ", store_num)
-    print("Postcode: ", postcode)
-    print("Router 1 Serial: ", router1_serial)
-    print("Circuit 1 Type: ", circuit1_type)
-    print("Circuit 1 Bandwidth Up: ", circuit1_bw_up)
-    print("Circuit 1 Bandwidth Down: ", circuit1_bw_down)
-    print("Router 2 Serial: ", router2_serial)
-    print("Circuit 2 Type: ", circuit2_type)
-    print("Circuit 2 Bandwidth Up: ", circuit2_bw_up)
-    print("Circuit 2 Bandwidth Down: ", circuit2_bw_down)
-    print("VLAN60 IPv4 Network: ", vlan60_ipv4)
-    print("VLAN70 IPv4 Network: ", vlan70_ipv4)
-    print("VLAN80 IPv4 Network: ", vlan80_ipv4)
-    print("VLAN10 IPv4 Network: ", vlan10_ipv4)
-    print("VLAN20 IPv4 Network: ", vlan20_ipv4)
-    print("VLAN30 IPv4 Network: ", vlan30_ipv4)
-    print("VLAN31 IPv4 Network: ", vlan31_ipv4)
-    print("VLAN40 IPv4 Network: ", vlan40_ipv4)
-    print("VLAN100 IPv4 Network: ", vlan100_ipv4)
-    print("VLAN120 IPv4 Network: ", vlan120_ipv4)
-    print("")
+
     tracker_row = tracker_row + 1
