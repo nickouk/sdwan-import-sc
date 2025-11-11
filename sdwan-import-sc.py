@@ -148,6 +148,7 @@ circuit2_ref_col = 17  # column Q
 circuit2_ppp_name_col = 19  # column S
 circuit2_ppp_pwd_col = 20  # column T
 vlan2_col = 21  # column U
+cctv_nat_col = 22  # column V
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
@@ -253,10 +254,14 @@ while tracker_row <= max_row:
         circuit1_ppp_pwd = 'dummy'
 
     # get vlan 2 network
-    vlan2_network = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan2_col).value)
-    if vlan2_network and '/' not in vlan2_network:
-        vlan2_network = vlan2_network + '/29'
-    vlan2_network = ipaddress.ip_network(vlan2_network, strict=False)
+    vlan2_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan2_col).value)
+    if vlan2_ipv4 and '/' not in vlan2_ipv4:
+        vlan2_ipv4 = vlan2_ipv4 + '/28'
+    vlan2_ipv4 = ipaddress.ip_network(vlan2_ipv4, strict=False)
+
+    # get cctv nat
+    cctv_nat = str(tracker_sheet_obj.cell(row=tracker_row, column=cctv_nat_col).value)
+    cctv_nat = ipaddress.ip_address(cctv_nat)
 
     # generate store networks from store number
     store_net_oct2 = store_num[0:2]
@@ -354,6 +359,21 @@ while tracker_row <= max_row:
     vmanage_dict['ethpppoe_ipsecPrefer'].append('111')
     vmanage_dict['wan_shapingRate'].append(circuit1_bw_up * 100)
     vmanage_dict['wan_track_addr'].append('1.1.1.1')
+    vmanage_dict['loopback0_ipv4'].append(str(router1_systemip))
+    vmanage_dict['loopback0_mask'].append('255.255.255.255')
+    vmanage_dict['lan_vpn_100_nat_1_rangeStart'].append(str(cctv_nat))
+    vmanage_dict['lan_vpn_100_nat_1_rangeEnd'].append(str(cctv_nat + 1))
+    vmanage_dict['lan_vpn_100_staticNat_1_translatedSourceIp'].append(str(cctv_nat))
+    vmanage_dict['lan_vpn_100_staticNat_2_translatedSourceIp'].append(str(cctv_nat + 1))
+    vmanage_dict['vlan2_vrrp_pri'].append('110')
+    vmanage_dict['vlan2_vrrp_ipv4'].append(str(vlan2_ipv4.network_address + 14))
+    vmanage_dict['vlan2_ipv4'].append(str(vlan2_ipv4.network_address + 12))
+    vmanage_dict['vlan2_mask'].append(str(vlan2_ipv4.netmask))
+    vmanage_dict['vlan2_dhcp_net'].append(str(vlan2_ipv4.network_address))
+    vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
+    vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 7)}-{str(vlan2_ipv4.network_address + 14)}')
+    vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
+
 
     # if we have a router 2 build the dictionary rows for router 2
     if router2_serial != 'NONE':
@@ -432,6 +452,20 @@ while tracker_row <= max_row:
         vmanage_dict['ethpppoe_ipsecPrefer'].append('0')
         vmanage_dict['wan_shapingRate'].append(circuit2_bw_up * 100)
         vmanage_dict['wan_track_addr'].append('8.8.8.8')
+        vmanage_dict['loopback0_ipv4'].append(str(router2_systemip))
+        vmanage_dict['loopback0_mask'].append('255.255.255.255')
+        vmanage_dict['lan_vpn_100_nat_1_rangeStart'].append(str(cctv_nat))
+        vmanage_dict['lan_vpn_100_nat_1_rangeEnd'].append(str(cctv_nat + 1))
+        vmanage_dict['lan_vpn_100_staticNat_1_translatedSourceIp'].append(str(cctv_nat))
+        vmanage_dict['lan_vpn_100_staticNat_2_translatedSourceIp'].append(str(cctv_nat + 1))
+        vmanage_dict['vlan2_vrrp_pri'].append('100')
+        vmanage_dict['vlan2_vrrp_ipv4'].append(str(vlan2_ipv4.network_address + 14))
+        vmanage_dict['vlan2_ipv4'].append(str(vlan2_ipv4.network_address + 13))
+        vmanage_dict['vlan2_mask'].append(str(vlan2_ipv4.netmask))
+        vmanage_dict['vlan2_dhcp_net'].append(str(vlan2_ipv4.network_address))
+        vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
+        vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 1)}-{str(vlan2_ipv4.network_address + 6)}";"{str(vlan2_ipv4.network_address + 12)}-{str(vlan2_ipv4.network_address + 14)}')
+        vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
 
     tracker_row = tracker_row + 1
 
@@ -464,7 +498,8 @@ if len(postcode_list) > 0:
 vmanage_dict['basic_gpsl_latitude'] = latlist
 vmanage_dict['basic_gpsl_longitude'] = longlist
 
-print(json.dumps(vmanage_dict, indent=1))
+# uncomment to print the dictionary for debugging
+#print(json.dumps(vmanage_dict, indent=1))
 
 # create the dataframe from the dictionary we built
 df = pd.DataFrame(vmanage_dict)
