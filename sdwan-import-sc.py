@@ -137,18 +137,22 @@ router1_serial_col = 5  # column E
 router1_mgmt_ip_col = 6  # column F
 circuit1_provider_col =  7  # column G
 circuit1_type_col = 8  # column H
-circuit1_ref_col = 9  # column I
-circuit1_ppp_name_col = 11  # column K
-circuit1_ppp_pwd_col = 12  # column L
-router2_serial_col = 13  # column M
-router2_mgmt_ip_col = 14  # column N
-circuit2_provider_col = 15  # column O
-circuit2_type_col = 16  # column P
-circuit2_ref_col = 17  # column Q
-circuit2_ppp_name_col = 19  # column S
-circuit2_ppp_pwd_col = 20  # column T
-vlan2_col = 21  # column U
-cctv_nat_col = 22  # column V
+circuit1_bw_up_col = 9  # column I
+circuit1_bw_down_col = 10  # column J
+circuit1_ref_col = 11  # column K
+circuit1_ppp_name_col = 13  # column M
+circuit1_ppp_pwd_col = 14  # column N
+router2_serial_col = 15  # column O
+router2_mgmt_ip_col = 16  # column P
+circuit2_provider_col = 17  # column Q
+circuit2_type_col = 18  # column R
+circuit2_bw_up_col = 19  # column S
+circuit2_bw_down_col = 20  # column T
+circuit2_ref_col = 21  # column U
+circuit2_ppp_name_col = 23  # column W
+circuit2_ppp_pwd_col = 24  # column X
+vlan2_col = 25  # column Y
+cctv_nat_col = 26  # column Z
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
@@ -181,7 +185,15 @@ while tracker_row <= max_row:
 
     # get circuit 1 type and bandwidth
     circuit1_type = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_type_col).value).upper()
-    circuit1_bw_down, circuit1_bw_up = circuit_bandwidth(circuit1_type)
+    circuit1_bw_down = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_bw_down_col).value)
+    circuit1_bw_up = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_bw_up_col).value)
+    
+    if circuit1_bw_down == 'None' or circuit1_bw_up == 'None':
+        circuit1_bw_down, circuit1_bw_up = circuit_bandwidth(circuit1_type)
+    
+    circuit1_bw_down = int(circuit1_bw_down)
+    circuit1_bw_up = int(circuit1_bw_up)
+
     circuit1_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ref_col).value).upper()
 
     # initialize router 2 variables in case of a single site router
@@ -205,7 +217,15 @@ while tracker_row <= max_row:
 
         # get circuit 2 type and bandwidth
         circuit2_type = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_type_col).value).upper()
-        circuit2_bw_down, circuit2_bw_up = circuit_bandwidth(circuit2_type)
+        circuit2_bw_down = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_bw_down_col).value)
+        circuit2_bw_up = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_bw_up_col).value)
+
+        if circuit2_bw_down == 'None' or circuit2_bw_up == 'None':
+            circuit2_bw_down, circuit2_bw_up = circuit_bandwidth(circuit2_type)
+        
+        circuit2_bw_down = int(circuit2_bw_down)
+        circuit2_bw_up = int(circuit2_bw_up)
+
         circuit2_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ref_col).value).upper()
 
         # get managment IP address for router 2
@@ -270,6 +290,7 @@ while tracker_row <= max_row:
     cctv_nat = ipaddress.ip_address(cctv_nat)
 
     # generate store networks from store number
+    actual_store_num = int(store_num[1:4])  # strip leading digit for network calc
     store_net_oct2 = store_num[0:2]
     if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
         store_net_oct2 = store_net_oct2[1:]
@@ -277,8 +298,17 @@ while tracker_row <= max_row:
     store_net_oct2 = int(store_net_oct2)
     store_net_oct3 = int(store_num[2:4])
 
+    store_net_oct2_vlan70 = store_net_oct2
+
+    if actual_store_num < 255:
+        store_net_oct2 = 1
+        store_net_oct2_vlan70 = 100
+        store_net_oct3 = actual_store_num
+
+
+
     vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
-    vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2}.{store_net_oct3}.0/24')
+    vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
     vlan80_ipv4 = ipaddress.ip_network(f'192.168.100.0/24')
     vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
     vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
@@ -287,6 +317,22 @@ while tracker_row <= max_row:
     vlan40_ipv4 = ipaddress.ip_network(f'192.168.102.0/24')
     vlan100_ipv4 = ipaddress.ip_network(f'192.168.103.0/24')
     vlan120_ipv4 = ipaddress.ip_network(f'192.168.104.0/24')
+
+    # print store networks for debugging
+
+    print(f'Store {store_num} VLAN networks:')
+    print(f'VLAN10: {vlan10_ipv4}')
+    print(f'VLAN20: {vlan20_ipv4}')
+    print(f'VLAN30: {vlan30_ipv4}')
+    print(f'VLAN31: {vlan31_ipv4}')
+    print(f'VLAN40: {vlan40_ipv4}')
+    print(f'VLAN60: {vlan60_ipv4}')
+    print(f'VLAN70: {vlan70_ipv4}')
+    print(f'VLAN80: {vlan80_ipv4}')
+    print(f'VLAN100: {vlan100_ipv4}')
+    print(f'VLAN120: {vlan120_ipv4}')
+    print('')
+
 
     # build the dictionary rows for router 1
     vmanage_dict['Device ID'].append("C1121X-8P-" + router1_serial)
