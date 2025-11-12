@@ -228,7 +228,10 @@ while tracker_row <= max_row:
         if circuit2_provider == 'BT' and circuit2_ppp_name == 'None':
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
-        
+
+        if circuit2_ppp_name == 'None':
+            circuit2_ppp_name = 'notrequired'
+
         # we need to duplicate the postcode for router 2 which is not optimal but works for now
         postcode_list.append(postcode)
 
@@ -252,6 +255,9 @@ while tracker_row <= max_row:
     if circuit1_provider == 'BT' and circuit1_ppp_name == 'None':
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
+    
+    if circuit1_ppp_name == 'None':
+        circuit1_ppp_name = 'notrequired'
 
     # get vlan 2 network
     vlan2_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan2_col).value)
