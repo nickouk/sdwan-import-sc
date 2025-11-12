@@ -502,7 +502,7 @@ while tracker_row <= max_row:
         vmanage_dict['wan_color'].append(router2_wan_color)
         vmanage_dict['ethpppoe_ipsecPrefer'].append('0')
         vmanage_dict['wan_shapingRate'].append(circuit2_bw_up * 1000)
-        vmanage_dict['wan_track_addr'].append('8.8.8.8')
+        vmanage_dict['wan_track_addr'].append('208.67.222.222')
         vmanage_dict['loopback0_ipv4'].append(str(router2_systemip))
         vmanage_dict['loopback0_mask'].append('255.255.255.255')
         vmanage_dict['lan_vpn_100_nat_1_rangeStart'].append(str(cctv_nat))
