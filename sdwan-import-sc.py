@@ -280,7 +280,6 @@ while tracker_row <= max_row:
     vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
     vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2}.{store_net_oct3}.0/24')
     vlan80_ipv4 = ipaddress.ip_network(f'192.168.100.0/24')
-    #vlan2_ipv4 = ADD THIS LATER
     vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
     vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
     vlan30_ipv4 = ipaddress.ip_network(f'192.168.101.0/24')
@@ -476,6 +475,7 @@ while tracker_row <= max_row:
     tracker_row = tracker_row + 1
 
 # end of main loop
+
 # perform postcode lookups to obtain GPS coords
 print('Performing postcode lookups ...\n')
 
@@ -514,4 +514,4 @@ df = pd.DataFrame(vmanage_dict)
 df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
 
 # all done
-print('\nvmanage-import-sc.csv has been created :)\n')
+print('vmanage-import-sc.csv has been created :)\n')
