@@ -71,18 +71,18 @@ def circuit_bandwidth(circuit_type):
     # Function to return circuit bandwidth based on circuit type
 
     if circuit_type == 'FTTP':
-        return (80, 20)
+        return (80, 20, 'GigabitEthernet0/0/0')
     elif circuit_type == 'SOGEA':
-        return (80, 20)
+        return (80, 20, 'Dialer1')
     elif circuit_type == 'FTTC':
-        return (80, 20)
+        return (80, 20, 'Dialer1')
     elif circuit_type == 'ADSL':
-        return (24, 1)
+        return (24, 3, 'Dialer1')
     elif circuit_type == 'OFNL Fibre':
-        return (80, 20)
+        return (80, 20, 'GigabitEthernet0/0/0')
     else:
         # return a tuple so callers that unpack won't fail
-        return (0, 0)
+        return (0, 0, 0)
 
 
 def sanatise_serial(serial):
@@ -125,7 +125,108 @@ tracker_sheet_obj = tracker_wb_obj.active
 max_row = tracker_sheet_obj.max_row
 
 # initialise some variables
-keys = ['Device ID', 'System IP', 'Host Name', 'Site Id', 'Dual Stack IPv6 Default', 'Rollback Timer (sec)', 'basic_gpsl_longitude', 'basic_gpsl_latitude', 'provision_port_disable', 'vlan31_vrrp_pri', 'vlan31_vrrp_ipv4', 'vlan31_ipv4', 'vlan31_mask', 'vlan31_dhcp_net', 'vlan31_dhcp_mask', 'vlan31_dhcp_exclude', 'vlan31_dhcp_gateway', 'vlan120_vrrp_pri', 'vlan120_vrrp_ipv4', 'vlan120_ipv4', 'vlan120_mask', 'vlan120_dhcp_exclude', 'vlan100_vrrp_pri', 'vlan100_vrrp_ipv4', 'vlan100_ipv4', 'vlan100_mask', 'vlan100_dhcp_exclude', 'vlan40_vrrp_pri', 'vlan40_vrrp_ipv4', 'vlan40_ipv4', 'vlan40_mask', 'vlan40_dhcp_exclude', 'vlan30_vrrp_pri', 'vlan30_vrrp_ipv4', 'vlan30_ipv4', 'vlan30_mask', 'vlan30_dhcp_exclude', 'lan_vpn_100_nat_1_rangeStart', 'lan_vpn_100_nat_1_rangeEnd', 'lan_vpn_100_staticNat_1_translatedSourceIp', 'lan_vpn_100_staticNat_2_translatedSourceIp', 'loopback0_ipv4', 'loopback0_mask', 'vlan20_vrrp_pri', 'vlan20_vrrp_ipv4', 'vlan20_ipv4', 'vlan20_mask', 'vlan20_dhcp_net', 'vlan20_dhcp_mask', 'vlan20_dhcp_exclude', 'vlan20_dhcp_gateway', 'vlan10_vrrp_pri', 'vlan10_vrrp_ipv4', 'vlan10_ipv4', 'vlan10_mask', 'vlan10_dhcp_net', 'vlan10_dhcp_mask', 'vlan10_dhcp_exclude', 'vlan10_dhcp_gateway', 'vlan2_vrrp_pri', 'vlan2_vrrp_ipv4', 'vlan2_ipv4', 'vlan2_mask', 'vlan2_dhcp_net', 'vlan2_dhcp_mask', 'vlan2_dhcp_exclude', 'vlan2_dhcp_gateway', 'vlan80_vrrp_pri', 'vlan80_vrrp_ipv4', 'vlan80_ipv4', 'vlan80_mask', 'vlan70_vrrp_pri', 'vlan70_vrrp_ipv4', 'vlan70_ipv4', 'vlan70_mask', 'vlan60_vrrp_pri', 'vlan60_vrrp_ipv4', 'vlan60_ipv4', 'vlan60_mask', 'tloc_next_hop', 'tloc_bandwidth_up', 'tloc_bandwidth_down', 'wan_bandwidth_up', 'wan_bandwidth_down', 'wan_desc', 'ethpppoe_chapHost', 'ethpppoe_chapPwd', 'wan_color', 'ethpppoe_ipsecPrefer', 'wan_shapingRate', 'wan_track_addr']
+keys = ['Device ID',
+'System IP',
+'Host Name',
+'Site Id',
+'Dual Stack IPv6 Default',
+'Rollback Timer (sec)',
+'basic_gpsl_longitude',
+'basic_gpsl_latitude',
+'provision_port_disable',
+'vlan31_vrrp_pri',
+'vlan31_vrrp_ipv4',
+'vlan31_ipv4',
+'vlan31_mask',
+'vlan31_dhcp_net',
+'vlan31_dhcp_mask',
+'vlan31_dhcp_exclude',
+'vlan31_dhcp_gateway',
+'vlan120_vrrp_pri',
+'vlan120_vrrp_ipv4',
+'vlan120_ipv4',
+'vlan120_mask',
+'vlan120_dhcp_exclude',
+'vlan100_vrrp_pri',
+'vlan100_vrrp_ipv4',
+'vlan100_ipv4',
+'vlan100_mask',
+'vlan100_dhcp_exclude',
+'vlan40_vrrp_pri',
+'vlan40_vrrp_ipv4',
+'vlan40_ipv4',
+'vlan40_mask',
+'vlan40_dhcp_exclude',
+'vlan30_vrrp_pri',
+'vlan30_vrrp_ipv4',
+'vlan30_ipv4',
+'vlan30_mask',
+'vlan30_dhcp_exclude',
+'lan_vpn_100_nat_1_rangeStart',
+'lan_vpn_100_nat_1_rangeEnd',
+'lan_vpn_100_staticNat_1_translatedSourceIp',
+'lan_vpn_100_staticNat_2_translatedSourceIp',
+'loopback0_ipv4',
+'loopback0_mask',
+'vlan20_vrrp_pri',
+'vlan20_vrrp_ipv4',
+'vlan20_ipv4',
+'vlan20_mask',
+'vlan20_dhcp_net',
+'vlan20_dhcp_mask',
+'vlan20_dhcp_exclude',
+'vlan20_dhcp_gateway',
+'vlan10_vrrp_pri',
+'vlan10_vrrp_ipv4',
+'vlan10_ipv4',
+'vlan10_mask',
+'vlan10_dhcp_net',
+'vlan10_dhcp_mask',
+'vlan10_dhcp_exclude',
+'vlan10_dhcp_gateway',
+'vlan2_vrrp_pri',
+'vlan2_vrrp_ipv4',
+'vlan2_ipv4',
+'vlan2_mask',
+'vlan2_dhcp_net',
+'vlan2_dhcp_mask',
+'vlan2_dhcp_exclude',
+'vlan2_dhcp_gateway',
+'vlan80_vrrp_pri',
+'vlan80_vrrp_ipv4',
+'vlan80_ipv4',
+'vlan80_mask',
+'vlan70_vrrp_pri',
+'vlan70_vrrp_ipv4',
+'vlan70_ipv4',
+'vlan70_mask',
+'vlan60_vrrp_pri',
+'vlan60_vrrp_ipv4',
+'vlan60_ipv4',
+'vlan60_mask',
+'tloc_next_hop',
+'tloc_bandwidth_up',
+'tloc_bandwidth_down',
+'wan_bandwidth_up',
+'wan_bandwidth_down',
+'wan_desc',
+'ethpppoe_chapHost',
+'ethpppoe_chapPwd',
+'wan_color',
+'ethpppoe_ipsecPrefer',
+'wan_shapingRate',
+'wan_track_addr',
+'cloudSaaSDeviceRole_variable',
+'cloudSaaSVpnType_variable',
+'cloudSaasSigTunnelList_variable',
+'cloudSaasTlocList_variable',
+'cloudSaasSigEnabled_variable',
+'cloudSaasInterfaceList_variable',
+'cloudSaasLBEnabled_variable',
+'cloudSaasLoss_variable',
+'cloudSaasLatency_variable',
+'cloudSaasSourceIpBased_variable',
+'qos_Interface_1']
 
 vmanage_dict = {key: [] for key in keys}
 
@@ -189,7 +290,9 @@ while tracker_row <= max_row:
     circuit1_bw_up = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_bw_up_col).value)
     
     if circuit1_bw_down == 'None' or circuit1_bw_up == 'None':
-        circuit1_bw_down, circuit1_bw_up = circuit_bandwidth(circuit1_type)
+        circuit1_bw_down, circuit1_bw_up, interface1 = circuit_bandwidth(circuit1_type)
+    else:
+        a, b, interface1 = circuit_bandwidth(circuit1_type)
     
     circuit1_bw_down = int(circuit1_bw_down)
     circuit1_bw_up = int(circuit1_bw_up)
@@ -221,7 +324,9 @@ while tracker_row <= max_row:
         circuit2_bw_up = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_bw_up_col).value)
 
         if circuit2_bw_down == 'None' or circuit2_bw_up == 'None':
-            circuit2_bw_down, circuit2_bw_up = circuit_bandwidth(circuit2_type)
+            circuit2_bw_down, circuit2_bw_up, interface2 = circuit_bandwidth(circuit2_type)
+        else:
+            a, b, interface2 = circuit_bandwidth(circuit2_type)
         
         circuit2_bw_down = int(circuit2_bw_down)
         circuit2_bw_up = int(circuit2_bw_up)
@@ -424,6 +529,19 @@ while tracker_row <= max_row:
     vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
     vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 7)}-{str(vlan2_ipv4.network_address + 14)}')
     vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
+    vmanage_dict['cloudSaaSDeviceRole_variable'].append('dia')
+    vmanage_dict['cloudSaaSVpnType_variable'].append('service-vpn')
+    vmanage_dict['cloudSaasTlocList_variable'].append('all')
+    vmanage_dict['cloudSaasSigTunnelList_variable'].append('')
+    vmanage_dict['cloudSaasSigEnabled_variable'].append('FALSE')
+    vmanage_dict['cloudSaasInterfaceList_variable'].append('')
+    vmanage_dict['cloudSaasLBEnabled_variable'].append('TRUE')
+    vmanage_dict['cloudSaasLoss_variable'].append(5)
+    vmanage_dict['cloudSaasLatency_variable'].append(100)
+    vmanage_dict['cloudSaasSourceIpBased_variable'].append('TRUE')
+    vmanage_dict['qos_Interface_1'].append(str(interface1))
+
+
 
 
     # if we have a router 2 build the dictionary rows for router 2
@@ -517,6 +635,17 @@ while tracker_row <= max_row:
         vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
         vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 1)}-{str(vlan2_ipv4.network_address + 6)}";"{str(vlan2_ipv4.network_address + 12)}-{str(vlan2_ipv4.network_address + 14)}')
         vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
+        vmanage_dict['cloudSaaSDeviceRole_variable'].append('dia')
+        vmanage_dict['cloudSaaSVpnType_variable'].append('service-vpn')
+        vmanage_dict['cloudSaasTlocList_variable'].append('all')
+        vmanage_dict['cloudSaasSigTunnelList_variable'].append('')
+        vmanage_dict['cloudSaasSigEnabled_variable'].append('FALSE')
+        vmanage_dict['cloudSaasInterfaceList_variable'].append('')
+        vmanage_dict['cloudSaasLBEnabled_variable'].append('TRUE')
+        vmanage_dict['cloudSaasLoss_variable'].append(5)
+        vmanage_dict['cloudSaasLatency_variable'].append(100)
+        vmanage_dict['cloudSaasSourceIpBased_variable'].append('TRUE')
+        vmanage_dict['qos_Interface_1'].append(str(interface2))
 
     tracker_row = tracker_row + 1
 
