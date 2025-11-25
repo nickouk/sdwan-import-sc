@@ -216,6 +216,7 @@ keys = ['Device ID',
 'ethpppoe_ipsecPrefer',
 'wan_shapingRate',
 'wan_track_addr',
+'wan_track_addr_tloc',
 'cloudSaaSDeviceRole_variable',
 'cloudSaaSVpnType_variable',
 'cloudSaasSigTunnelList_variable',
@@ -515,6 +516,7 @@ while tracker_row <= max_row:
     vmanage_dict['ethpppoe_ipsecPrefer'].append('111')
     vmanage_dict['wan_shapingRate'].append(circuit1_bw_up * 1000)
     vmanage_dict['wan_track_addr'].append('1.1.1.1')
+    vmanage_dict['wan_track_addr_tloc'].append('208.67.222.222')
     vmanage_dict['loopback0_ipv4'].append(str(router1_systemip))
     vmanage_dict['loopback0_mask'].append('255.255.255.255')
     vmanage_dict['lan_vpn_100_nat_1_rangeStart'].append(str(cctv_nat))
@@ -621,6 +623,7 @@ while tracker_row <= max_row:
         vmanage_dict['ethpppoe_ipsecPrefer'].append('0')
         vmanage_dict['wan_shapingRate'].append(circuit2_bw_up * 1000)
         vmanage_dict['wan_track_addr'].append('208.67.222.222')
+        vmanage_dict['wan_track_addr_tloc'].append('1.1.1.1')
         vmanage_dict['loopback0_ipv4'].append(str(router2_systemip))
         vmanage_dict['loopback0_mask'].append('255.255.255.255')
         vmanage_dict['lan_vpn_100_nat_1_rangeStart'].append(str(cctv_nat))
@@ -686,7 +689,11 @@ vmanage_dict['basic_gpsl_longitude'] = longlist
 df = pd.DataFrame(vmanage_dict)
 
 # write the dataframe to a csv ready for import into vManage
-df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
+try:
+    df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
+except PermissionError:
+    print('*' * 120,'\nError: vmanage-import-sc.csv is open in another application - please close and re-run the script\n','*' * 120)
+    exit()
 
 # all done
 print('vmanage-import-sc.csv has been created :)\n')
