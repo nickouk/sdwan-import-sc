@@ -255,6 +255,8 @@ circuit2_ppp_name_col = 23  # column W
 circuit2_ppp_pwd_col = 24  # column X
 vlan2_col = 25  # column Y
 cctv_nat_col = 26  # column Z
+provision_port_disable_col = 27
+
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
@@ -384,6 +386,13 @@ while tracker_row <= max_row:
     
     if circuit1_ppp_name == 'None':
         circuit1_ppp_name = 'notrequired'
+    
+    # get provision port status
+    provision_port_disable = str(tracker_sheet_obj.cell(row=tracker_row, column=provision_port_disable_col).value)
+    if provision_port_disable == 'None':
+        provision_port_disable = 'FALSE'
+    else:
+        provision_port_disable = 'TRUE'
 
     # get vlan 2 network
     vlan2_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan2_col).value)
@@ -417,7 +426,8 @@ while tracker_row <= max_row:
         store_net_oct2_vlan70 = 100
         store_net_oct3 = actual_store_num
 
-    print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
+    # commented out debug print statements
+    # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
 
     vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
     vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
@@ -453,7 +463,7 @@ while tracker_row <= max_row:
     vmanage_dict['Site Id'].append(site_id)
     vmanage_dict['Dual Stack IPv6 Default'].append('FALSE')
     vmanage_dict['Rollback Timer (sec)'].append('300')
-    vmanage_dict['provision_port_disable'].append('FALSE')
+    vmanage_dict['provision_port_disable'].append(provision_port_disable)
     vmanage_dict['vlan31_vrrp_pri'].append('110')
     vmanage_dict['vlan31_vrrp_ipv4'].append(str(vlan31_ipv4.network_address + 14))
     vmanage_dict['vlan31_ipv4'].append(str(vlan31_ipv4.network_address + 12))
@@ -500,15 +510,15 @@ while tracker_row <= max_row:
     vmanage_dict['vlan10_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 126))
     vmanage_dict['vlan60_vrrp_pri'].append('110')
     vmanage_dict['vlan60_vrrp_ipv4'].append(str(vlan60_ipv4.network_address + 254))
-    vmanage_dict['vlan60_ipv4'].append(str(vlan60_ipv4.network_address + 251))
+    vmanage_dict['vlan60_ipv4'].append(str(vlan60_ipv4.network_address + 252))
     vmanage_dict['vlan60_mask'].append(str(vlan60_ipv4.netmask))
     vmanage_dict['vlan70_vrrp_pri'].append('110')
     vmanage_dict['vlan70_vrrp_ipv4'].append(str(vlan70_ipv4.network_address + 254))
-    vmanage_dict['vlan70_ipv4'].append(str(vlan70_ipv4.network_address + 251))
+    vmanage_dict['vlan70_ipv4'].append(str(vlan70_ipv4.network_address + 252))
     vmanage_dict['vlan70_mask'].append(str(vlan70_ipv4.netmask))
     vmanage_dict['vlan80_vrrp_pri'].append('110')
     vmanage_dict['vlan80_vrrp_ipv4'].append(str(vlan80_ipv4.network_address + 254))
-    vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 251))
+    vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 252))
     vmanage_dict['vlan80_mask'].append(str(vlan80_ipv4.netmask))
     vmanage_dict['tloc_next_hop'].append(str('192.168.12.2'))
     vmanage_dict['tloc_bandwidth_up'].append(str(circuit1_bw_up * 1000))
@@ -560,7 +570,7 @@ while tracker_row <= max_row:
         vmanage_dict['Site Id'].append(site_id)
         vmanage_dict['Dual Stack IPv6 Default'].append('FALSE')
         vmanage_dict['Rollback Timer (sec)'].append('300')
-        vmanage_dict['provision_port_disable'].append('FALSE')
+        vmanage_dict['provision_port_disable'].append(provision_port_disable)
         vmanage_dict['vlan31_vrrp_pri'].append('100')
         vmanage_dict['vlan31_vrrp_ipv4'].append(str(vlan31_ipv4.network_address + 14))
         vmanage_dict['vlan31_ipv4'].append(str(vlan31_ipv4.network_address + 13))
@@ -607,15 +617,15 @@ while tracker_row <= max_row:
         vmanage_dict['vlan10_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 126))
         vmanage_dict['vlan60_vrrp_pri'].append('100')
         vmanage_dict['vlan60_vrrp_ipv4'].append(str(vlan60_ipv4.network_address + 254))
-        vmanage_dict['vlan60_ipv4'].append(str(vlan60_ipv4.network_address + 252))
+        vmanage_dict['vlan60_ipv4'].append(str(vlan60_ipv4.network_address + 253))
         vmanage_dict['vlan60_mask'].append(str(vlan60_ipv4.netmask))
         vmanage_dict['vlan70_vrrp_pri'].append('100')
         vmanage_dict['vlan70_vrrp_ipv4'].append(str(vlan70_ipv4.network_address + 254))
-        vmanage_dict['vlan70_ipv4'].append(str(vlan70_ipv4.network_address + 252))
+        vmanage_dict['vlan70_ipv4'].append(str(vlan70_ipv4.network_address + 253))
         vmanage_dict['vlan70_mask'].append(str(vlan70_ipv4.netmask))
         vmanage_dict['vlan80_vrrp_pri'].append('100')
         vmanage_dict['vlan80_vrrp_ipv4'].append(str(vlan80_ipv4.network_address + 254))
-        vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 252))
+        vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 253))
         vmanage_dict['vlan80_mask'].append(str(vlan80_ipv4.netmask))
         vmanage_dict['tloc_next_hop'].append(str('192.168.21.1'))
         vmanage_dict['tloc_bandwidth_up'].append(str(circuit2_bw_up * 1000))
