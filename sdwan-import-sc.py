@@ -35,6 +35,7 @@ import re
 import math
 import pickle
 import json
+import math
 
 
 def postcode_api(postcode_apilist):
@@ -260,6 +261,85 @@ provision_port_disable_col = 27
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
+# --- Test code to generate SCOOP subnets only ---
+# keys = ['store','vlan60','vlan70','vlan10','vlan20','vlan31']
+# subnets_dict = {key: [] for key in keys}
+
+# #file1 = open('/mnt/c/Users/nick.oneill/Downloads/subnets.txt', 'w')
+# #test generated store numbers from 0000 to 9999
+
+# for store in range(0, 9999):
+
+#     store_num = str(store).zfill(4)
+
+#     # generate store networks from store number
+#     # python splice uses start:end so to get characters 1-3 use 0:3 negative indexes work from end of string
+#     # 1:4 gets characters 1,2,3
+#     actual_store_num = int(store_num[1:4])  # strip leading digit for network calc
+#     # 0:2 gets first two characters
+#     store_net_oct2 = store_num[0:2]
+#     if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
+#         # 1: starts at character 2 to end of string
+#         store_net_oct2 = store_net_oct2[1:]
+
+#     store_net_oct2 = int(store_net_oct2)
+#     store_net_oct3 = int(store_num[2:4])
+
+#     store_net_oct2_vlan70 = store_net_oct2
+#     store_net_oct2_vlan31 = store_net_oct2
+#     store_net_oct3_vlan31 = store_net_oct3
+
+#     if actual_store_num < 255:
+#         store_net_oct2 = 1
+#         store_net_oct2_vlan70 = 100
+#         store_net_oct3 = actual_store_num
+
+    
+#     # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
+#     try:
+#         vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
+#     except:
+#         vlan60_ipv4 = (f'{store} error')
+#     try:
+#         vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
+#     except:
+#         vlan70_ipv4 = (f'{store} error')
+#     try:
+#         vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
+#     except:
+#         vlan10_ipv4 = (f'{store} error')
+#     try:
+#         vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
+#     except:
+#         vlan20_ipv4 = (f'{store} error')
+#     try:
+#         vlan31_ipv4 = ipaddress.ip_network(f'10.11{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
+#     except:
+#         vlan31_ipv4 = (f'{store} error')
+
+#     subnets_dict['store'].append(store)
+#     subnets_dict['vlan60'].append(str(vlan60_ipv4))
+#     subnets_dict['vlan70'].append(str(vlan70_ipv4))
+#     subnets_dict['vlan10'].append(str(vlan10_ipv4))
+#     subnets_dict['vlan20'].append(str(vlan20_ipv4))
+#     subnets_dict['vlan31'].append(str(vlan31_ipv4))
+
+# df = pd.DataFrame(subnets_dict)
+
+# try:
+#     df.to_csv('/mnt/c/Users/nick.oneill/Downloads/scoop-subnets.csv', index=False)
+# except PermissionError:
+#     print('*' * 120,'\nError: scoop-subnets.csv is open in another application - please close and re-run the script\n','*' * 120)
+#     exit()
+
+# # all done
+# print('scoop-subnets.csv has been created :)\n')
+
+  
+
+#file1.close()
+#sys.exit()
+
 tracker_row = 3
 postcode_list = []
 print(f'{max_row} rows found ...\n')
@@ -402,7 +482,18 @@ while tracker_row <= max_row:
 
     # get cctv nat
     cctv_nat = str(tracker_sheet_obj.cell(row=tracker_row, column=cctv_nat_col).value)
-    cctv_nat = ipaddress.ip_address(cctv_nat)
+    if cctv_nat == 'None':
+
+        # generate cctv nat from store number
+        a = int(store_num) * 4
+
+        octet3 = math.floor(int(a) / 256)
+        octet4 = a - (octet3 * 256)
+
+        cctv_nat = ipaddress.ip_address(f'172.19.{octet3}.{octet4}')
+
+    else:
+        cctv_nat = ipaddress.ip_address(cctv_nat)
 
     # generate store networks from store number
     # python splice uses start:end so to get characters 1-3 use 0:3 negative indexes work from end of string
@@ -426,7 +517,7 @@ while tracker_row <= max_row:
         store_net_oct2_vlan70 = 100
         store_net_oct3 = actual_store_num
 
-    # commented out debug print statements
+    
     # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
 
     vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
