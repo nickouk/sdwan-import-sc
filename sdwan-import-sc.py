@@ -37,6 +37,95 @@ import pickle
 import json
 import math
 
+def store_nets(store_num):
+
+	# generate store networks from store number
+
+    # python splice uses start:end so to get characters 1-3 use 0:3 negative indexes work from end of string  
+    # 1:4 gets characters 2nd, 3rd and 4th characters
+    actual_store_num = int(store_num[1:4])  # strip leading digit for network calc
+    
+    # 0:2 gets first two characters
+    store_net_oct2 = store_num[0:2]
+    if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
+        # 1: starts at character 2 to end of string
+        store_net_oct2 = store_net_oct2[1:]
+
+    store_net_oct2 = int(store_net_oct2)
+    store_net_oct3 = int(store_num[2:4])
+
+    store_net_oct2_vlan70 = store_net_oct2
+    store_net_oct2_vlan31 = (f'{store_net_oct2:1>3}')
+    store_net_oct3_vlan31 = store_net_oct3
+    store_net_oct2_vlan101 = (f'{store_net_oct2:1>3}')
+
+    if actual_store_num < 255:
+        store_net_oct2 = 1
+        store_net_oct2_vlan70 = 100
+        store_net_oct3 = actual_store_num
+
+    return(store_net_oct2, store_net_oct3, store_net_oct2_vlan70, store_net_oct2_vlan31, store_net_oct3_vlan31, store_net_oct2_vlan101)
+
+def test_store_nets():
+
+	# --- Test code to generate SCOOP store subnets ---
+	keys = ['store','vlan60','vlan70','vlan10','vlan20','vlan31','vlan101']
+	subnets_dict = {key: [] for key in keys}
+	
+	file1 = open('/mnt/c/Users/nick.oneill/Downloads/subnets.txt', 'w')
+	# test generated store numbers from 0000 to 9999
+	
+	for store in range(0, 9999):
+	
+		store_num = str(store).zfill(4)
+		store_net_oct2, store_net_oct3, store_net_oct2_vlan70, store_net_oct2_vlan31, store_net_oct3_vlan31, store_net_oct2_vlan101 = store_nets(store_num)
+		
+		# print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
+		try:
+			vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
+		except:
+			vlan60_ipv4 = (f'{store} error')
+		try:
+			vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
+		except:
+			vlan70_ipv4 = (f'{store} error')
+		try:
+			vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
+		except:
+			vlan10_ipv4 = (f'{store} error')
+		try:
+			vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
+		except:
+			vlan20_ipv4 = (f'{store} error')
+		try:
+			vlan31_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
+		except:
+			vlan31_ipv4 = (f'{store} error')
+		try:
+			vlan101_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan101}.{store_net_oct3}.224/27')
+		except:
+			vlan101_ipv4 = (f'{store} error')
+	
+		subnets_dict['store'].append(f'{store:0>4}')
+		subnets_dict['vlan60'].append(str(vlan60_ipv4))
+		subnets_dict['vlan70'].append(str(vlan70_ipv4))
+		subnets_dict['vlan10'].append(str(vlan10_ipv4))
+		subnets_dict['vlan20'].append(str(vlan20_ipv4))
+		subnets_dict['vlan31'].append(str(vlan31_ipv4))
+		subnets_dict['vlan101'].append(str(vlan101_ipv4))
+	
+	df = pd.DataFrame(subnets_dict)
+	
+	try:
+		df.to_csv('/mnt/c/Users/nick.oneill/Downloads/scoop-subnets.csv', index=False)
+	except PermissionError:
+		print('*' * 120,'\nError: scoop-subnets.csv is open in another application - please close and re-run the script\n','*' * 120)
+		exit()
+	
+	# all done
+	print('scoop-subnets.csv has been created :)\n')
+	file1.close()
+	return()
 
 def postcode_api(postcode_apilist):
 
@@ -261,84 +350,12 @@ provision_port_disable_col = 27
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
-# --- Test code to generate SCOOP subnets only ---
-# keys = ['store','vlan60','vlan70','vlan10','vlan20','vlan31']
-# subnets_dict = {key: [] for key in keys}
+test_run = False  # set to True to test store_nets function only
 
-# #file1 = open('/mnt/c/Users/nick.oneill/Downloads/subnets.txt', 'w')
-# #test generated store numbers from 0000 to 9999
-
-# for store in range(0, 9999):
-
-#     store_num = str(store).zfill(4)
-
-#     # generate store networks from store number
-#     # python splice uses start:end so to get characters 1-3 use 0:3 negative indexes work from end of string
-#     # 1:4 gets characters 1,2,3
-#     actual_store_num = int(store_num[1:4])  # strip leading digit for network calc
-#     # 0:2 gets first two characters
-#     store_net_oct2 = store_num[0:2]
-#     if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
-#         # 1: starts at character 2 to end of string
-#         store_net_oct2 = store_net_oct2[1:]
-
-#     store_net_oct2 = int(store_net_oct2)
-#     store_net_oct3 = int(store_num[2:4])
-
-#     store_net_oct2_vlan70 = store_net_oct2
-#     store_net_oct2_vlan31 = store_net_oct2
-#     store_net_oct3_vlan31 = store_net_oct3
-
-#     if actual_store_num < 255:
-#         store_net_oct2 = 1
-#         store_net_oct2_vlan70 = 100
-#         store_net_oct3 = actual_store_num
-
-    
-#     # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
-#     try:
-#         vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
-#     except:
-#         vlan60_ipv4 = (f'{store} error')
-#     try:
-#         vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
-#     except:
-#         vlan70_ipv4 = (f'{store} error')
-#     try:
-#         vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
-#     except:
-#         vlan10_ipv4 = (f'{store} error')
-#     try:
-#         vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
-#     except:
-#         vlan20_ipv4 = (f'{store} error')
-#     try:
-#         vlan31_ipv4 = ipaddress.ip_network(f'10.11{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
-#     except:
-#         vlan31_ipv4 = (f'{store} error')
-
-#     subnets_dict['store'].append(store)
-#     subnets_dict['vlan60'].append(str(vlan60_ipv4))
-#     subnets_dict['vlan70'].append(str(vlan70_ipv4))
-#     subnets_dict['vlan10'].append(str(vlan10_ipv4))
-#     subnets_dict['vlan20'].append(str(vlan20_ipv4))
-#     subnets_dict['vlan31'].append(str(vlan31_ipv4))
-
-# df = pd.DataFrame(subnets_dict)
-
-# try:
-#     df.to_csv('/mnt/c/Users/nick.oneill/Downloads/scoop-subnets.csv', index=False)
-# except PermissionError:
-#     print('*' * 120,'\nError: scoop-subnets.csv is open in another application - please close and re-run the script\n','*' * 120)
-#     exit()
-
-# # all done
-# print('scoop-subnets.csv has been created :)\n')
-
-  
-
-#file1.close()
-#sys.exit()
+if test_run:
+    print('\nTest run selected - no changes will be made to vManage import sheet\n')
+    novalue = test_store_nets()
+    sys.exit()
 
 tracker_row = 3
 postcode_list = []
@@ -377,8 +394,8 @@ while tracker_row <= max_row:
     else:
         a, b, interface1 = circuit_bandwidth(circuit1_type)
     
-    circuit1_bw_down = int(circuit1_bw_down)
-    circuit1_bw_up = int(circuit1_bw_up)
+    circuit1_bw_down = float(circuit1_bw_down)
+    circuit1_bw_up = float(circuit1_bw_up)
 
     circuit1_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ref_col).value).upper()
 
@@ -411,8 +428,8 @@ while tracker_row <= max_row:
         else:
             a, b, interface2 = circuit_bandwidth(circuit2_type)
         
-        circuit2_bw_down = int(circuit2_bw_down)
-        circuit2_bw_up = int(circuit2_bw_up)
+        circuit2_bw_down = float(circuit2_bw_down)
+        circuit2_bw_up = float(circuit2_bw_up)
 
         circuit2_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ref_col).value).upper()
 
@@ -495,28 +512,7 @@ while tracker_row <= max_row:
     else:
         cctv_nat = ipaddress.ip_address(cctv_nat)
 
-    # generate store networks from store number
-    # python splice uses start:end so to get characters 1-3 use 0:3 negative indexes work from end of string
-    # 1:4 gets characters 1,2,3
-    actual_store_num = int(store_num[1:4])  # strip leading digit for network calc
-    # 0:2 gets first two characters
-    store_net_oct2 = store_num[0:2]
-    if store_net_oct2[0] == '0' or store_net_oct2[0] == '9':
-        # 1: starts at character 2 to end of string
-        store_net_oct2 = store_net_oct2[1:]
-
-    store_net_oct2 = int(store_net_oct2)
-    store_net_oct3 = int(store_num[2:4])
-
-    store_net_oct2_vlan70 = store_net_oct2
-    store_net_oct2_vlan31 = store_net_oct2
-    store_net_oct3_vlan31 = store_net_oct3
-
-    if actual_store_num < 255:
-        store_net_oct2 = 1
-        store_net_oct2_vlan70 = 100
-        store_net_oct3 = actual_store_num
-
+    store_net_oct2, store_net_oct3, store_net_oct2_vlan70, store_net_oct2_vlan31, store_net_oct3_vlan31, store_net_oct2_vlan101 = store_nets(store_num)
     
     # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
 
@@ -526,7 +522,7 @@ while tracker_row <= max_row:
     vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
     vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
     vlan30_ipv4 = ipaddress.ip_network(f'192.168.101.0/24')
-    vlan31_ipv4 = ipaddress.ip_network(f'10.11{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
+    vlan31_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
     vlan40_ipv4 = ipaddress.ip_network(f'192.168.102.0/24')
     vlan100_ipv4 = ipaddress.ip_network(f'192.168.103.0/24')
     vlan120_ipv4 = ipaddress.ip_network(f'192.168.104.0/24')
@@ -612,16 +608,16 @@ while tracker_row <= max_row:
     vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 252))
     vmanage_dict['vlan80_mask'].append(str(vlan80_ipv4.netmask))
     vmanage_dict['tloc_next_hop'].append(str('192.168.12.2'))
-    vmanage_dict['tloc_bandwidth_up'].append(str(circuit1_bw_up * 1000))
-    vmanage_dict['tloc_bandwidth_down'].append(str(circuit1_bw_down * 1000))
-    vmanage_dict['wan_bandwidth_up'].append(str(circuit1_bw_up * 1000))
-    vmanage_dict['wan_bandwidth_down'].append(str(circuit1_bw_down * 1000))
+    vmanage_dict['tloc_bandwidth_up'].append(str(int(circuit1_bw_up * 1000)))
+    vmanage_dict['tloc_bandwidth_down'].append(str(int(circuit1_bw_down * 1000)))
+    vmanage_dict['wan_bandwidth_up'].append(str(int(circuit1_bw_up * 1000)))
+    vmanage_dict['wan_bandwidth_down'].append(str(int(circuit1_bw_down * 1000)))
     vmanage_dict['wan_desc'].append(f'{circuit1_ref} - {circuit1_type} via {circuit1_provider}')
     vmanage_dict['ethpppoe_chapHost'].append(circuit1_ppp_name)
     vmanage_dict['ethpppoe_chapPwd'].append(circuit1_ppp_pwd)
     vmanage_dict['wan_color'].append(router1_wan_color)
     vmanage_dict['ethpppoe_ipsecPrefer'].append('111')
-    vmanage_dict['wan_shapingRate'].append(circuit1_bw_up * 1000)
+    vmanage_dict['wan_shapingRate'].append(int(circuit1_bw_up * 1000))
     vmanage_dict['wan_track_addr'].append('1.1.1.1')
     vmanage_dict['wan_track_addr_tloc'].append('208.67.222.222')
     vmanage_dict['loopback0_ipv4'].append(str(router1_systemip))
@@ -719,16 +715,16 @@ while tracker_row <= max_row:
         vmanage_dict['vlan80_ipv4'].append(str(vlan80_ipv4.network_address + 253))
         vmanage_dict['vlan80_mask'].append(str(vlan80_ipv4.netmask))
         vmanage_dict['tloc_next_hop'].append(str('192.168.21.1'))
-        vmanage_dict['tloc_bandwidth_up'].append(str(circuit2_bw_up * 1000))
-        vmanage_dict['tloc_bandwidth_down'].append(str(circuit2_bw_down * 1000))
-        vmanage_dict['wan_bandwidth_up'].append(str(circuit2_bw_up * 1000))
-        vmanage_dict['wan_bandwidth_down'].append(str(circuit2_bw_down * 1000))
+        vmanage_dict['tloc_bandwidth_up'].append(str(int(circuit2_bw_up * 1000)))
+        vmanage_dict['tloc_bandwidth_down'].append(str(int(circuit2_bw_down * 1000)))
+        vmanage_dict['wan_bandwidth_up'].append(str(int(circuit2_bw_up * 1000)))
+        vmanage_dict['wan_bandwidth_down'].append(str(int(circuit2_bw_down * 1000)))
         vmanage_dict['wan_desc'].append(f'{circuit2_ref} - {circuit2_type} via {circuit2_provider}')
         vmanage_dict['ethpppoe_chapHost'].append(circuit2_ppp_name)
         vmanage_dict['ethpppoe_chapPwd'].append(circuit2_ppp_pwd)
         vmanage_dict['wan_color'].append(router2_wan_color)
         vmanage_dict['ethpppoe_ipsecPrefer'].append('0')
-        vmanage_dict['wan_shapingRate'].append(circuit2_bw_up * 1000)
+        vmanage_dict['wan_shapingRate'].append(int(circuit2_bw_up * 1000))
         vmanage_dict['wan_track_addr'].append('208.67.222.222')
         vmanage_dict['wan_track_addr_tloc'].append('1.1.1.1')
         vmanage_dict['loopback0_ipv4'].append(str(router2_systemip))
