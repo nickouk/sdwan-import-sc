@@ -378,7 +378,8 @@ while tracker_row <= max_row:
 
     # get the postcode
     postcode = str(tracker_sheet_obj.cell(row=tracker_row, column=postcode_col).value).upper().replace(' ', '')
-    postcode_list.append(postcode)
+    # moved the append postcode to after router checks to avoid arrys being different sizes
+
 
     # get router 1 serial number
     router1_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=router1_serial_col).value).upper()
@@ -463,8 +464,17 @@ while tracker_row <= max_row:
     # get managment IP address for router 1
     router1_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=router1_mgmt_ip_col).value)
     if '/' not in router1_mgmt_ip: router1_mgmt_ip = router1_mgmt_ip + '/32'
-    router1_mgmt_ip = ipaddress.ip_network(router1_mgmt_ip, strict=False)
+    try:
+        router1_mgmt_ip = ipaddress.ip_network(router1_mgmt_ip, strict=False)
+    except ValueError:
+        print(f'Error: invalid management IP address for store {store_num} row {tracker_row}  ... skipping to next row')
+        tracker_row = tracker_row + 1
+        continue
+
     router1_systemip = router1_mgmt_ip.network_address
+
+    # only safe to append post code if we are not skipping the row (we fetched the post code earlier in the loop)
+    postcode_list.append(postcode)
 
     # build router 1 hostname
     router1_hostname = f'SC-{store_type}-{store_num}-R1'
@@ -758,7 +768,7 @@ while tracker_row <= max_row:
 # end of main loop
 
 # perform postcode lookups to obtain GPS coords
-print('Performing postcode lookups ...\n')
+print('\nPerforming postcode lookups ...\n')
 
 # Break the postcode list into chunks of 100 as the API has a max 100 limit
 
