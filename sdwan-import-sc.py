@@ -385,6 +385,11 @@ while tracker_row <= max_row:
     router1_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=router1_serial_col).value).upper()
     router1_serial = sanatise_serial(router1_serial)
 
+    if router1_serial == 'NONE' or router1_serial == '':
+        print(f'Error: missing router 1 serial number for store {store_num} row {tracker_row}  ... skipping to next row')
+        tracker_row = tracker_row + 1
+        continue
+  
     # get circuit 1 type and bandwidth
     circuit1_type = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_type_col).value).upper()
     circuit1_bw_down = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_bw_down_col).value)
