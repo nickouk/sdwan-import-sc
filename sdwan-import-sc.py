@@ -193,10 +193,10 @@ def sanatise_serial(serial):
 def wan_color(circuit_provider):
 
     # Function to return wan color based on circuit provider
-
-    if circuit_provider == 'BT':
+    
+    if circuit_provider == 'BT' or circuit_provider == 'MAINTEL-BT':
         return 'blue'
-    elif circuit_provider == 'PXC':
+    elif circuit_provider == 'PXC' or circuit_provider == 'MAINTEL-PXC':
         return 'green'
     elif circuit_provider == 'Other':
         return 'public-internet'
@@ -208,8 +208,13 @@ def wan_color(circuit_provider):
 # -----------------------------
 # Open the tracker sheet
 
-tracker_wb_obj = openpyxl.load_workbook(
-    '/mnt/c/Users/nick.oneill/Downloads/NOF2025 Rollout tracker.xlsx')
+try:
+    tracker_wb_obj = openpyxl.load_workbook(
+        '/mnt/c/Users/nick.oneill/Downloads/NOF2025 Rollout tracker.xlsx')
+except FileNotFoundError:
+    print('*' * 120,'\nError: NOF2025 Rollout tracker.xlsx file not found - please download from Sharepoint and re-run the script\n','*' * 120)
+    sys.exit()
+
 tracker_sheet_obj = tracker_wb_obj.active
 # determine how many rows we have
 max_row = tracker_sheet_obj.max_row
@@ -242,6 +247,14 @@ keys = ['Device ID',
 'vlan100_ipv4',
 'vlan100_mask',
 'vlan100_dhcp_exclude',
+'vlan101_vrrp_pri',
+'vlan101_vrrp_ipv4',
+'vlan101_ipv4',
+'vlan101_mask',
+'vlan101_dhcp_net',
+'vlan101_dhcp_mask',
+'vlan101_dhcp_exclude',
+'vlan101_dhcp_gateway',
 'vlan40_vrrp_pri',
 'vlan40_vrrp_ipv4',
 'vlan40_ipv4',
@@ -344,9 +357,10 @@ circuit2_ref_col = 21  # column U
 circuit2_ppp_name_col = 23  # column W
 circuit2_ppp_pwd_col = 24  # column X
 vlan2_col = 25  # column Y
-cctv_nat_col = 26  # column Z
-provision_port_disable_col = 27
+vlan60_col = 26  # column Z
+provision_port_disable_col = 27 # column AA
 
+unique_subnets = set()
 
 # main loop - loop through the tracker sheet and build rows for the vmanage-import-sc.csv dictionary transforming some of the data
 
@@ -512,50 +526,70 @@ while tracker_row <= max_row:
         vlan2_ipv4 = vlan2_ipv4 + '/28'
     vlan2_ipv4 = ipaddress.ip_network(vlan2_ipv4, strict=False)
 
-    # get cctv nat
-    cctv_nat = str(tracker_sheet_obj.cell(row=tracker_row, column=cctv_nat_col).value)
-    if cctv_nat == 'None':
+    # generate cctv nat from store number
+    a = int(store_num) * 4
 
-        # generate cctv nat from store number
-        a = int(store_num) * 4
+    octet3 = math.floor(int(a) / 256)
+    octet4 = a - (octet3 * 256)
 
-        octet3 = math.floor(int(a) / 256)
-        octet4 = a - (octet3 * 256)
+    cctv_nat = ipaddress.ip_address(f'172.19.{octet3}.{octet4}')
 
-        cctv_nat = ipaddress.ip_address(f'172.19.{octet3}.{octet4}')
-
-    else:
-        cctv_nat = ipaddress.ip_address(cctv_nat)
-
+    # generate store networks from store number
     store_net_oct2, store_net_oct3, store_net_oct2_vlan70, store_net_oct2_vlan31, store_net_oct3_vlan31, store_net_oct2_vlan101 = store_nets(store_num)
     
-    # print(f'store_num {store_num} store_net_oct2 {store_net_oct2} store_net_oct3 {store_net_oct3}')
+    vlan60_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan60_col).value)
 
-    vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
+    if store_type == 3 or store_type == 4:
+        vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
+        vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
+    else:
+        vlan60_ipv4 = ipaddress.ip_network(vlan60_ipv4, strict=False)
+        vlan20_ipv4 = ipaddress.ip_network(f'{vlan60_ipv4.network_address.packed[0]}.1{vlan60_ipv4.network_address.packed[1]}.{vlan60_ipv4.network_address.packed[2]}.{vlan60_ipv4.network_address.packed[3]}/24')
+    
     vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
     vlan80_ipv4 = ipaddress.ip_network(f'192.168.100.0/24')
     vlan10_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.0/25')
-    vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
     vlan30_ipv4 = ipaddress.ip_network(f'192.168.101.0/24')
     vlan31_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan31}.{store_net_oct3_vlan31}.0/28')
     vlan40_ipv4 = ipaddress.ip_network(f'192.168.102.0/24')
     vlan100_ipv4 = ipaddress.ip_network(f'192.168.103.0/24')
+    vlan101_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan101}.{store_net_oct3}.224/27')
     vlan120_ipv4 = ipaddress.ip_network(f'192.168.104.0/24')
+
+    # add the unique subnets to a python set to check for duplicates
+    # add checks for Vlan 42 - Wesley Media
+    # add checks for Vlan 192 - Cremators
+
+    store_subnets = [str(vlan10_ipv4), str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan70_ipv4), str(vlan2_ipv4)]
+    
+    if store_type == 5 or store_type == 6:
+        store_subnets.append(str(vlan101_ipv4))
+    
+    for subnet in store_subnets:
+        if subnet in unique_subnets:
+            print(f'Error: Duplicate subnet {subnet} found for store {store_num} row {tracker_row}  ... ABORTED - Please correct and re-run')
+            tracker_row = tracker_row + 1
+            sys.exit()
+        else:
+            unique_subnets.add(subnet)
 
     # print store networks for debugging
 
-    print(f'Store {store_num} VLAN networks:')
-    print(f'VLAN10: {vlan10_ipv4}')
-    print(f'VLAN20: {vlan20_ipv4}')
-    print(f'VLAN30: {vlan30_ipv4}')
-    print(f'VLAN31: {vlan31_ipv4}')
-    print(f'VLAN40: {vlan40_ipv4}')
-    print(f'VLAN60: {vlan60_ipv4}')
-    print(f'VLAN70: {vlan70_ipv4}')
-    print(f'VLAN80: {vlan80_ipv4}')
-    print(f'VLAN100: {vlan100_ipv4}')
-    print(f'VLAN120: {vlan120_ipv4}')
-    print('')
+    print_nets = True
+    if print_nets:
+        print(f'Store {store_num} VLAN networks:')
+        print(f'VLAN10: {vlan10_ipv4}')
+        print(f'VLAN20: {vlan20_ipv4}')
+        print(f'VLAN30: {vlan30_ipv4}')
+        print(f'VLAN31: {vlan31_ipv4}')
+        print(f'VLAN40: {vlan40_ipv4}')
+        print(f'VLAN60: {vlan60_ipv4}')
+        print(f'VLAN70: {vlan70_ipv4}')
+        print(f'VLAN80: {vlan80_ipv4}')
+        print(f'VLAN100: {vlan100_ipv4}')
+        print(f'VLAN101: {vlan101_ipv4}')
+        print(f'VLAN120: {vlan120_ipv4}')
+        print('')
 
 
     # build the dictionary rows for router 1
@@ -584,6 +618,14 @@ while tracker_row <= max_row:
     vmanage_dict['vlan100_ipv4'].append(str(vlan100_ipv4.network_address + 252))
     vmanage_dict['vlan100_mask'].append(str(vlan100_ipv4.netmask))
     vmanage_dict['vlan100_dhcp_exclude'].append(f'{str(vlan100_ipv4.network_address + 128)}-{str(vlan100_ipv4.network_address + 254)}')
+    vmanage_dict['vlan101_vrrp_pri'].append('110')
+    vmanage_dict['vlan101_vrrp_ipv4'].append(str(vlan101_ipv4.network_address + 30))
+    vmanage_dict['vlan101_ipv4'].append(str(vlan101_ipv4.network_address + 28))
+    vmanage_dict['vlan101_mask'].append(str(vlan101_ipv4.netmask))
+    vmanage_dict['vlan101_dhcp_net'].append(str(vlan10_ipv4.network_address))
+    vmanage_dict['vlan101_dhcp_mask'].append(str(vlan10_ipv4.netmask))
+    vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 30))
+    vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 128)}-{str(vlan101_ipv4.network_address + 254)}')
     vmanage_dict['vlan40_vrrp_pri'].append('110')
     vmanage_dict['vlan40_vrrp_ipv4'].append(str(vlan40_ipv4.network_address + 254))
     vmanage_dict['vlan40_ipv4'].append(str(vlan40_ipv4.network_address + 252))
@@ -691,6 +733,14 @@ while tracker_row <= max_row:
         vmanage_dict['vlan100_ipv4'].append(str(vlan100_ipv4.network_address + 253))
         vmanage_dict['vlan100_mask'].append(str(vlan100_ipv4.netmask))
         vmanage_dict['vlan100_dhcp_exclude'].append(f'{str(vlan100_ipv4.network_address + 1)}-{str(vlan100_ipv4.network_address + 127)}";"{str(vlan100_ipv4.network_address + 252)}-{str(vlan100_ipv4.network_address + 254)}')
+        vmanage_dict['vlan101_vrrp_pri'].append('100')
+        vmanage_dict['vlan101_vrrp_ipv4'].append(str(vlan101_ipv4.network_address + 30))
+        vmanage_dict['vlan101_ipv4'].append(str(vlan101_ipv4.network_address + 29))
+        vmanage_dict['vlan101_mask'].append(str(vlan101_ipv4.netmask))
+        vmanage_dict['vlan101_dhcp_net'].append(str(vlan10_ipv4.network_address))
+        vmanage_dict['vlan101_dhcp_mask'].append(str(vlan10_ipv4.netmask))
+        vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 30))
+        vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 1)}-{str(vlan101_ipv4.network_address + 127)}";"{str(vlan101_ipv4.network_address + 252)}-{str(vlan101_ipv4.network_address + 254)}')
         vmanage_dict['vlan40_vrrp_pri'].append('100')
         vmanage_dict['vlan40_vrrp_ipv4'].append(str(vlan40_ipv4.network_address + 254))
         vmanage_dict['vlan40_ipv4'].append(str(vlan40_ipv4.network_address + 253))
@@ -804,6 +854,9 @@ vmanage_dict['basic_gpsl_longitude'] = longlist
 #print(json.dumps(vmanage_dict, indent=1))
 
 # create the dataframe from the dictionary we built
+
+# uncomment the following lines to pprint the dictionary - ValueError: All arrays must be of the same length means one or more of the dictonary lists is the wrong length compared to the rest
+#pprint.pprint(vmanage_dict)
 df = pd.DataFrame(vmanage_dict)
 
 # write the dataframe to a csv ready for import into vManage
