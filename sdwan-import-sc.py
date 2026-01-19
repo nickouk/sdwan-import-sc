@@ -540,9 +540,12 @@ while tracker_row <= max_row:
     vlan60_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan60_col).value)
 
     if store_type == 3 or store_type == 4:
+
         vlan60_ipv4 = ipaddress.ip_network(f'151.{store_net_oct2}.{store_net_oct3}.0/24')
         vlan20_ipv4 = ipaddress.ip_network(f'10.1{store_net_oct2}.{store_net_oct3}.128/25')
     else:
+        if vlan60_ipv4 and '/' not in vlan60_ipv4:
+            vlan60_ipv4 = vlan60_ipv4 + '/24'
         vlan60_ipv4 = ipaddress.ip_network(vlan60_ipv4, strict=False)
         vlan20_ipv4 = ipaddress.ip_network(f'{vlan60_ipv4.network_address.packed[0]}.1{vlan60_ipv4.network_address.packed[1]}.{vlan60_ipv4.network_address.packed[2]}.{vlan60_ipv4.network_address.packed[3]}/24')
     
@@ -575,9 +578,10 @@ while tracker_row <= max_row:
 
     # print store networks for debugging
 
-    print_nets = True
+    print_nets = False
     if print_nets:
         print(f'Store {store_num} VLAN networks:')
+        print(f'VLAN2: {vlan2_ipv4}')
         print(f'VLAN10: {vlan10_ipv4}')
         print(f'VLAN20: {vlan20_ipv4}')
         print(f'VLAN30: {vlan30_ipv4}')
@@ -622,10 +626,10 @@ while tracker_row <= max_row:
     vmanage_dict['vlan101_vrrp_ipv4'].append(str(vlan101_ipv4.network_address + 30))
     vmanage_dict['vlan101_ipv4'].append(str(vlan101_ipv4.network_address + 28))
     vmanage_dict['vlan101_mask'].append(str(vlan101_ipv4.netmask))
-    vmanage_dict['vlan101_dhcp_net'].append(str(vlan10_ipv4.network_address))
-    vmanage_dict['vlan101_dhcp_mask'].append(str(vlan10_ipv4.netmask))
-    vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 30))
-    vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 128)}-{str(vlan101_ipv4.network_address + 254)}')
+    vmanage_dict['vlan101_dhcp_net'].append(str(vlan101_ipv4.network_address))
+    vmanage_dict['vlan101_dhcp_mask'].append(str(vlan101_ipv4.netmask))
+    vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan101_ipv4.network_address + 30))
+    vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 14)}-{str(vlan101_ipv4.network_address + 30)}')
     vmanage_dict['vlan40_vrrp_pri'].append('110')
     vmanage_dict['vlan40_vrrp_ipv4'].append(str(vlan40_ipv4.network_address + 254))
     vmanage_dict['vlan40_ipv4'].append(str(vlan40_ipv4.network_address + 252))
@@ -737,10 +741,10 @@ while tracker_row <= max_row:
         vmanage_dict['vlan101_vrrp_ipv4'].append(str(vlan101_ipv4.network_address + 30))
         vmanage_dict['vlan101_ipv4'].append(str(vlan101_ipv4.network_address + 29))
         vmanage_dict['vlan101_mask'].append(str(vlan101_ipv4.netmask))
-        vmanage_dict['vlan101_dhcp_net'].append(str(vlan10_ipv4.network_address))
-        vmanage_dict['vlan101_dhcp_mask'].append(str(vlan10_ipv4.netmask))
-        vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan10_ipv4.network_address + 30))
-        vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 1)}-{str(vlan101_ipv4.network_address + 127)}";"{str(vlan101_ipv4.network_address + 252)}-{str(vlan101_ipv4.network_address + 254)}')
+        vmanage_dict['vlan101_dhcp_net'].append(str(vlan101_ipv4.network_address))
+        vmanage_dict['vlan101_dhcp_mask'].append(str(vlan101_ipv4.netmask))
+        vmanage_dict['vlan101_dhcp_gateway'].append(str(vlan101_ipv4.network_address + 30))
+        vmanage_dict['vlan101_dhcp_exclude'].append(f'{str(vlan101_ipv4.network_address + 1)}-{str(vlan101_ipv4.network_address + 13)}";"{str(vlan101_ipv4.network_address + 28)}-{str(vlan101_ipv4.network_address + 30)}')
         vmanage_dict['vlan40_vrrp_pri'].append('100')
         vmanage_dict['vlan40_vrrp_ipv4'].append(str(vlan40_ipv4.network_address + 254))
         vmanage_dict['vlan40_ipv4'].append(str(vlan40_ipv4.network_address + 253))
