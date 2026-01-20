@@ -559,14 +559,15 @@ while tracker_row <= max_row:
     vlan101_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan101}.{store_net_oct3}.224/27')
     vlan120_ipv4 = ipaddress.ip_network(f'192.168.104.0/24')
 
-    # add the unique subnets to a python set to check for duplicates
-    # add checks for Vlan 42 - Wesley Media
-    # add checks for Vlan 192 - Cremators
+    # add the globally significant subnets (vrf 100, 700) to a python set to check for duplicates
+    # checks for Vlan 42 - Wesley Media (not required as not globally significant - vrf 400)
+    # checks for Vlan 192 - Cremators (not required as not globally significant - vrf 400)
 
-    store_subnets = [str(vlan10_ipv4), str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan70_ipv4), str(vlan2_ipv4)]
+    if store_type == 3 or store_type == 4:
+        store_subnets = [str(vlan10_ipv4), str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan70_ipv4), str(vlan2_ipv4)]
     
     if store_type == 5 or store_type == 6:
-        store_subnets.append(str(vlan101_ipv4))
+        store_subnets = [str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan101_ipv4), str(vlan2_ipv4)]
     
     for subnet in store_subnets:
         if subnet in unique_subnets:
