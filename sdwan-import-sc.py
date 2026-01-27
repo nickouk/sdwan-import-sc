@@ -161,7 +161,7 @@ def circuit_bandwidth(circuit_type):
     # Function to return circuit bandwidth based on circuit type
 
     if circuit_type == 'FTTP':
-        return (80, 20, 'GigabitEthernet0/0/0')
+        return (80, 20, 'Dialer1')
     elif circuit_type == 'SOGEA':
         return (80, 20, 'Dialer1')
     elif circuit_type == 'FTTC':
