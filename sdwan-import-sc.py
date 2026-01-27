@@ -598,7 +598,10 @@ while tracker_row <= max_row:
 
 
     # build the dictionary rows for router 1
-    vmanage_dict['Device ID'].append("C1121X-8P-" + router1_serial)
+    router_model = 'C1121X-8P-'
+    if router1_serial == 'FGL2623LBSX':
+        router_model = 'C1127X-8PLTEP-'
+    vmanage_dict['Device ID'].append(router_model + router1_serial)
     vmanage_dict['System IP'].append(str(router1_systemip))
     vmanage_dict['Host Name'].append(router1_hostname)
     vmanage_dict['Site Id'].append(site_id)
