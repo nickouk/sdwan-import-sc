@@ -12,6 +12,7 @@
 
 # openpxyl is a library for handing MS Excel files
 
+from ast import If
 import openpyxl
 
 # pandas is used for working with csv files
@@ -330,7 +331,8 @@ keys = ['Device ID',
 'cloudSaasLoss_variable',
 'cloudSaasLatency_variable',
 'cloudSaasSourceIpBased_variable',
-'qos_Interface_1']
+'qos_Interface_1',
+'port_offset']
 
 vmanage_dict = {key: [] for key in keys}
 
@@ -492,9 +494,6 @@ while tracker_row <= max_row:
 
     router1_systemip = router1_mgmt_ip.network_address
 
-    # only safe to append post code if we are not skipping the row (we fetched the post code earlier in the loop)
-    postcode_list.append(postcode)
-
     # build router 1 hostname
     router1_hostname = f'SC-{store_type}-{store_num}-R1'
 
@@ -522,6 +521,12 @@ while tracker_row <= max_row:
 
     # get vlan 2 network
     vlan2_ipv4 = str(tracker_sheet_obj.cell(row=tracker_row, column=vlan2_col).value)
+
+    if vlan2_ipv4 == 'None' or "VLOOKUP" in vlan2_ipv4:
+        print(f'Error: missing VLAN 2 network for store {store_num} row {tracker_row}  ... SKIPPING - Please correct and re-run')
+        tracker_row = tracker_row + 1
+        continue
+    
     if vlan2_ipv4 and '/' not in vlan2_ipv4:
         vlan2_ipv4 = vlan2_ipv4 + '/28'
     vlan2_ipv4 = ipaddress.ip_network(vlan2_ipv4, strict=False)
@@ -595,7 +600,9 @@ while tracker_row <= max_row:
         print(f'VLAN101: {vlan101_ipv4}')
         print(f'VLAN120: {vlan120_ipv4}')
         print('')
-
+    
+    # only safe to append post code if we are not skipping the row (we fetched the post code earlier in the loop)
+    postcode_list.append(postcode)
 
     # build the dictionary rows for router 1
     router_model = 'C1121X-8P-'
@@ -710,9 +717,7 @@ while tracker_row <= max_row:
     vmanage_dict['cloudSaasLatency_variable'].append(100)
     vmanage_dict['cloudSaasSourceIpBased_variable'].append('TRUE')
     vmanage_dict['qos_Interface_1'].append(str(interface1))
-
-
-
+    vmanage_dict['port_offset'].append(0)
 
     # if we have a router 2 build the dictionary rows for router 2
     if router2_serial != 'NONE':
@@ -825,6 +830,7 @@ while tracker_row <= max_row:
         vmanage_dict['cloudSaasLatency_variable'].append(100)
         vmanage_dict['cloudSaasSourceIpBased_variable'].append('TRUE')
         vmanage_dict['qos_Interface_1'].append(str(interface2))
+        vmanage_dict['port_offset'].append(1)
 
     tracker_row = tracker_row + 1
 
@@ -863,8 +869,14 @@ vmanage_dict['basic_gpsl_longitude'] = longlist
 
 # create the dataframe from the dictionary we built
 
-# uncomment the following lines to pprint the dictionary - ValueError: All arrays must be of the same length means one or more of the dictonary lists is the wrong length compared to the rest
-#pprint.pprint(vmanage_dict)
+# Set print_array_length to True if - ValueError: All arrays must be of the same length means one or more of the dictonary lists is the wrong length compared to the rest
+# Print length of each array in vmanage_dict
+print_array_length = False
+if print_array_length is True:
+    print("\nLength of each array in vmanage_dict:")
+    for key, value in vmanage_dict.items():
+        print(f"{key}: {len(value)}")
+    print()
 df = pd.DataFrame(vmanage_dict)
 
 # write the dataframe to a csv ready for import into vManage
