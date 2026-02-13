@@ -437,7 +437,9 @@ while tracker_row <= max_row:
 
     # get router 2 serial number if present otherwsie assume a singe router site
     router2_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_serial_col).value).upper()
-    if router2_serial != 'NONE':
+    circuit2_provider = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_provider_col).value).upper()
+
+    if router2_serial != 'NONE' and circuit2_provider != 'NONE':
         router2_serial = sanatise_serial(router2_serial)
 
         # get circuit 2 type and bandwidth
@@ -720,7 +722,7 @@ while tracker_row <= max_row:
     vmanage_dict['port_offset'].append(0)
 
     # if we have a router 2 build the dictionary rows for router 2
-    if router2_serial != 'NONE':
+    if router2_serial != 'NONE' and circuit2_provider != 'NONE':
         vmanage_dict['Device ID'].append("C1121X-8P-" + router2_serial)
         vmanage_dict['System IP'].append(str(router2_systemip))
         vmanage_dict['Host Name'].append(router2_hostname)
