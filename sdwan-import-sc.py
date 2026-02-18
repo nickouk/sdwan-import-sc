@@ -499,6 +499,11 @@ while tracker_row <= max_row:
                 
         # get managment IP address for router 2
         router2_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_mgmt_ip_col).value)
+        if router2_mgmt_ip == 'None' or router2_mgmt_ip == '':
+            print(f'Error: missing management IP address for router 2 for store {store_num} row {tracker_row}  ... skipping to next row')
+            tracker_row = tracker_row + 1
+            continue
+
         if '/' not in router2_mgmt_ip: router2_mgmt_ip = router2_mgmt_ip + '/32'
         router2_mgmt_ip = ipaddress.ip_network(router2_mgmt_ip, strict=False)
         router2_systemip = router2_mgmt_ip.network_address
@@ -530,7 +535,7 @@ while tracker_row <= max_row:
     try:
         router1_mgmt_ip = ipaddress.ip_network(router1_mgmt_ip, strict=False)
     except ValueError:
-        print(f'Error: invalid management IP address for store {store_num} row {tracker_row}  ... skipping to next row')
+        print(f'Error: invalid management IP address for router 1 for store {store_num} row {tracker_row}  ... skipping to next row')
         tracker_row = tracker_row + 1
         continue
 
