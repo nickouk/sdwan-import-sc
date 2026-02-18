@@ -171,6 +171,8 @@ def circuit_bandwidth(circuit_type):
         return (24, 3, 'Dialer1')
     elif circuit_type == 'OFNL Fibre':
         return (80, 20, 'GigabitEthernet0/0/0')
+    elif circuit_type == 'ETHERNET':
+        return (100, 100, 'GigabitEthernet0/0/0')
     else:
         # return a tuple so callers that unpack won't fail
         return (0, 0, 0)
