@@ -323,6 +323,9 @@ keys = ['Device ID',
 'wan_shapingRate',
 'wan_track_addr',
 'wan_track_addr_tloc',
+'static_wan_ip',
+'static_wan_mask',
+'static_wan_gw',
 'cloudSaaSDeviceRole_variable',
 'cloudSaaSVpnType_variable',
 'cloudSaasSigTunnelList_variable',
@@ -349,6 +352,7 @@ circuit1_type_col = 8  # column H
 circuit1_bw_up_col = 9  # column I
 circuit1_bw_down_col = 10  # column J
 circuit1_ref_col = 11  # column K
+circuit1_wan_subnet_col = 12  # column L
 circuit1_ppp_name_col = 13  # column M
 circuit1_ppp_pwd_col = 14  # column N
 router2_serial_col = 15  # column O
@@ -358,6 +362,7 @@ circuit2_type_col = 18  # column R
 circuit2_bw_up_col = 19  # column S
 circuit2_bw_down_col = 20  # column T
 circuit2_ref_col = 21  # column U
+circuit2_wan_subnet_col = 22  # column V
 circuit2_ppp_name_col = 23  # column W
 circuit2_ppp_pwd_col = 24  # column X
 vlan2_col = 25  # column Y
@@ -423,6 +428,23 @@ while tracker_row <= max_row:
 
     circuit1_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ref_col).value).upper()
 
+    router1_static_wan_ip = 'NONE'
+    router1_static_wan_gw = 'NONE'
+    router1_static_wan_mask = 'NONE'
+
+    # get static wan IP and subnet if circuit type is ETHERNET
+    if circuit1_type == 'ETHERNET':
+        circuit1_static_wan_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_wan_subnet_col).value)
+        
+        if '/' not in circuit1_static_wan_ip:
+            circuit1_static_wan_ip = circuit1_static_wan_ip + '/29'
+        
+        circuit1_wan_subnet = ipaddress.ip_network(circuit1_static_wan_ip, strict=False)
+
+        router1_static_wan_ip = str(circuit1_wan_subnet.network_address + 1)
+        router1_static_wan_gw = str(circuit1_wan_subnet.network_address + 2)
+        router1_static_wan_mask = str(circuit1_wan_subnet.netmask)
+
     # initialize router 2 variables in case of a single site router
     router2_serial = 'NONE'
     circuit2_type = 'NONE'
@@ -436,6 +458,9 @@ while tracker_row <= max_row:
     router2_systemip = 'NONE'
     router2_hostname = 'NONE'
     router2_wan_color = 'NONE'
+    router2_static_wan_ip = 'NONE'
+    router2_static_wan_gw = 'NONE'
+    router2_static_wan_mask = 'NONE'
 
     # get router 2 serial number if present otherwsie assume a singe router site
     router2_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_serial_col).value).upper()
@@ -459,6 +484,19 @@ while tracker_row <= max_row:
 
         circuit2_ref = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ref_col).value).upper()
 
+        # get static wan IP and subnet if circuit type is ETHERNET
+        if circuit2_type == 'ETHERNET':
+            circuit2_static_wan_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_wan_subnet_col).value)
+            
+            if '/' not in circuit2_static_wan_ip:
+                circuit2_static_wan_ip = circuit2_static_wan_ip + '/29'
+            
+            circuit2_wan_subnet = ipaddress.ip_network(circuit2_static_wan_ip, strict=False)
+
+            router2_static_wan_ip = str(circuit2_wan_subnet.network_address + 1)
+            router2_static_wan_gw = str(circuit2_wan_subnet.network_address + 2)
+            router2_static_wan_mask = str(circuit2_wan_subnet.netmask)
+                
         # get managment IP address for router 2
         router2_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_mgmt_ip_col).value)
         if '/' not in router2_mgmt_ip: router2_mgmt_ip = router2_mgmt_ip + '/32'
@@ -710,6 +748,9 @@ while tracker_row <= max_row:
     vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
     vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 7)}-{str(vlan2_ipv4.network_address + 14)}')
     vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
+    vmanage_dict['static_wan_ip'].append(router1_static_wan_ip)
+    vmanage_dict['static_wan_gw'].append(router1_static_wan_gw)
+    vmanage_dict['static_wan_mask'].append(router1_static_wan_mask)
     vmanage_dict['cloudSaaSDeviceRole_variable'].append('dia')
     vmanage_dict['cloudSaaSVpnType_variable'].append('service-vpn')
     vmanage_dict['cloudSaasTlocList_variable'].append('all')
@@ -823,6 +864,9 @@ while tracker_row <= max_row:
         vmanage_dict['vlan2_dhcp_mask'].append(str(vlan2_ipv4.netmask))
         vmanage_dict['vlan2_dhcp_exclude'].append(f'{str(vlan2_ipv4.network_address + 1)}-{str(vlan2_ipv4.network_address + 6)}";"{str(vlan2_ipv4.network_address + 12)}-{str(vlan2_ipv4.network_address + 14)}')
         vmanage_dict['vlan2_dhcp_gateway'].append(str(vlan2_ipv4.network_address + 14))
+        vmanage_dict['static_wan_ip'].append(router2_static_wan_ip)
+        vmanage_dict['static_wan_gw'].append(router2_static_wan_gw)
+        vmanage_dict['static_wan_mask'].append(router2_static_wan_mask)
         vmanage_dict['cloudSaaSDeviceRole_variable'].append('dia')
         vmanage_dict['cloudSaaSVpnType_variable'].append('service-vpn')
         vmanage_dict['cloudSaasTlocList_variable'].append('all')
