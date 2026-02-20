@@ -430,7 +430,7 @@ while tracker_row <= max_row:
 
     router1_static_wan_ip = 'NONE'
     router1_static_wan_gw = 'NONE'
-    router1_static_wan_mask = 'NONE'
+    router1_static_wan_mask = '255.255.255.248'
 
     # get static wan IP and subnet if circuit type is ETHERNET
     if circuit1_type == 'ETHERNET':
@@ -441,9 +441,11 @@ while tracker_row <= max_row:
         
         circuit1_wan_subnet = ipaddress.ip_network(circuit1_static_wan_ip, strict=False)
 
-        router1_static_wan_ip = str(circuit1_wan_subnet.network_address + 1)
-        router1_static_wan_gw = str(circuit1_wan_subnet.network_address + 2)
+        router1_static_wan_ip = str(circuit1_wan_subnet.network_address + 2)
+        router1_static_wan_gw = str(circuit1_wan_subnet.network_address + 1)
         router1_static_wan_mask = str(circuit1_wan_subnet.netmask)
+
+        print(f'Store {store_num} Router 1 static WAN IP {router1_static_wan_ip} GW {router1_static_wan_gw} Mask {router1_static_wan_mask}')
 
     # initialize router 2 variables in case of a single site router
     router2_serial = 'NONE'
@@ -460,7 +462,7 @@ while tracker_row <= max_row:
     router2_wan_color = 'NONE'
     router2_static_wan_ip = 'NONE'
     router2_static_wan_gw = 'NONE'
-    router2_static_wan_mask = 'NONE'
+    router2_static_wan_mask = '255.255.255.248'
 
     # get router 2 serial number if present otherwsie assume a singe router site
     router2_serial = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_serial_col).value).upper()
@@ -493,8 +495,8 @@ while tracker_row <= max_row:
             
             circuit2_wan_subnet = ipaddress.ip_network(circuit2_static_wan_ip, strict=False)
 
-            router2_static_wan_ip = str(circuit2_wan_subnet.network_address + 1)
-            router2_static_wan_gw = str(circuit2_wan_subnet.network_address + 2)
+            router2_static_wan_ip = str(circuit2_wan_subnet.network_address + 2)
+            router2_static_wan_gw = str(circuit2_wan_subnet.network_address + 1)
             router2_static_wan_mask = str(circuit2_wan_subnet.netmask)
                 
         # get managment IP address for router 2
