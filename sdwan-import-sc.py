@@ -55,7 +55,7 @@ def store_nets(store_num):
     store_net_oct2 = int(store_net_oct2)
     store_net_oct3 = int(store_num[2:4])
 
-    store_net_oct2_vlan70 = store_net_oct2
+    store_net_oct2_vlan70 = store_net_oct2 + 100
     store_net_oct2_vlan31 = (f'{store_net_oct2:1>3}')
     store_net_oct3_vlan31 = store_net_oct3
     store_net_oct2_vlan101 = (f'{store_net_oct2:1>3}')
@@ -196,7 +196,7 @@ def sanatise_serial(serial):
 def wan_color(circuit_provider):
 
     # Function to return wan color based on circuit provider
-    
+      
     if circuit_provider == 'BT' or circuit_provider == 'MAINTEL-BT':
         return 'blue'
     elif circuit_provider == 'PXC' or circuit_provider == 'MAINTEL-PXC':
@@ -445,7 +445,7 @@ while tracker_row <= max_row:
         router1_static_wan_gw = str(circuit1_wan_subnet.network_address + 1)
         router1_static_wan_mask = str(circuit1_wan_subnet.netmask)
 
-        print(f'Store {store_num} Router 1 static WAN IP {router1_static_wan_ip} GW {router1_static_wan_gw} Mask {router1_static_wan_mask}')
+        #print(f'Store {store_num} Router 1 static WAN IP {router1_static_wan_ip} GW {router1_static_wan_gw} Mask {router1_static_wan_mask}')
 
     # initialize router 2 variables in case of a single site router
     router2_serial = 'NONE'
