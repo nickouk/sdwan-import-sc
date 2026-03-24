@@ -56,6 +56,10 @@ def store_nets(store_num):
     store_net_oct3 = int(store_num[2:4])
 
     store_net_oct2_vlan70 = store_net_oct2 + 100
+        
+    if store_num == "9729":
+        #store_net_oct2_vlan70 = store_net_oct2  # exception for store 9729 which is in vlan70 but has store net oct2
+        print(f'Exception for store 9729 - store_net_oct2_vlan70 set to {store_net_oct2_vlan70}')
     store_net_oct2_vlan31 = (f'{store_net_oct2:1>3}')
     store_net_oct3_vlan31 = store_net_oct3
     store_net_oct2_vlan101 = (f'{store_net_oct2:1>3}')
