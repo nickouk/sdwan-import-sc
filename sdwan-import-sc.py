@@ -57,9 +57,6 @@ def store_nets(store_num):
 
     store_net_oct2_vlan70 = store_net_oct2 + 100
         
-    if store_num == "9729":
-        #store_net_oct2_vlan70 = store_net_oct2  # exception for store 9729 which is in vlan70 but has store net oct2
-        print(f'Exception for store 9729 - store_net_oct2_vlan70 set to {store_net_oct2_vlan70}')
     store_net_oct2_vlan31 = (f'{store_net_oct2:1>3}')
     store_net_oct3_vlan31 = store_net_oct3
     store_net_oct2_vlan101 = (f'{store_net_oct2:1>3}')
@@ -519,7 +516,8 @@ while tracker_row <= max_row:
 
         # get provider for circuit 2
         circuit2_provider = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_provider_col).value).upper()
-        router2_wan_color = wan_color(circuit2_provider)
+        #router2_wan_color = wan_color(circuit2_provider)
+        router2_wan_color = 'green' # default router 2 as some carrier migrations demand PXC + PXC intially which breaks the config is the same color is used for both circuits
 
         # get ppp name and password for circuit 2
         circuit2_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_name_col).value)
@@ -552,7 +550,8 @@ while tracker_row <= max_row:
 
     # get provider for circuit 1
     circuit1_provider = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_provider_col).value).upper()
-    router1_wan_color = wan_color(circuit1_provider)
+    #router1_wan_color = wan_color(circuit1_provider)
+    router1_wan_color = 'blue' # default router 1 as some carrier migrations demand PXC + PXC intially which breaks the config is the same color is used for both circuits
 
     # get ppp name and password for circuit 1
     circuit1_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_name_col).value)
