@@ -523,12 +523,14 @@ while tracker_row <= max_row:
         circuit2_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_name_col).value)
         circuit2_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit2_ppp_pwd_col).value)
 
-        if circuit2_provider == 'BT' and circuit2_ppp_name == 'None':
+        if 'BT' in circuit2_provider and circuit2_ppp_name == 'None':
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
 
         if circuit2_ppp_name == 'None':
-            circuit2_ppp_name = 'notrequired'
+            print(f'Warning: missing PPPoE name for circuit 2 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
+            circuit2_ppp_name = 'dummy@bband1.com'
+            circuit2_ppp_pwd = 'dummy'
 
         # we need to duplicate the postcode for router 2 which is not optimal but works for now
         postcode_list.append(postcode)
@@ -557,13 +559,15 @@ while tracker_row <= max_row:
     circuit1_ppp_name = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_name_col).value)
     circuit1_ppp_pwd = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_ppp_pwd_col).value)
 
-    if circuit1_provider == 'BT' and circuit1_ppp_name == 'None':
+    if 'BT' in circuit1_provider and circuit1_ppp_name == 'None':
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
     
     if circuit1_ppp_name == 'None':
-        circuit1_ppp_name = 'notrequired'
-    
+        print(f'Warning: missing PPPoE name AND circuit not set as BT for circuit 1 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
+        circuit1_ppp_name = 'dummy@bband1.com'
+        circuit1_ppp_pwd = 'dummy'
+
     # get provision port status
     provision_port_disable = str(tracker_sheet_obj.cell(row=tracker_row, column=provision_port_disable_col).value)
     if provision_port_disable == 'None':
@@ -603,7 +607,12 @@ while tracker_row <= max_row:
     else:
         if vlan60_ipv4 and '/' not in vlan60_ipv4:
             vlan60_ipv4 = vlan60_ipv4 + '/24'
-        vlan60_ipv4 = ipaddress.ip_network(vlan60_ipv4, strict=False)
+        try:
+             vlan60_ipv4 = ipaddress.ip_network(vlan60_ipv4, strict=False)
+        except ValueError:
+            print(f'Error: invalid VLAN 60 network for store {store_num} row {tracker_row}  ... SKIPPING - Please correct and re-run')
+            tracker_row = tracker_row + 1
+            continue
         vlan20_ipv4 = ipaddress.ip_network(f'{vlan60_ipv4.network_address.packed[0]}.1{vlan60_ipv4.network_address.packed[1]}.{vlan60_ipv4.network_address.packed[2]}.{vlan60_ipv4.network_address.packed[3]}/24')
     
     vlan70_ipv4 = ipaddress.ip_network(f'10.{store_net_oct2_vlan70}.{store_net_oct3}.0/24')
