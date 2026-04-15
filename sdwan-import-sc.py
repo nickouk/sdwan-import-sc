@@ -397,7 +397,12 @@ while tracker_row <= max_row:
 
     # get the store type
     store_type = str(tracker_sheet_obj.cell(row=tracker_row, column=store_type_col).value).upper()
-    store_type = int(store_type[0])  # first character only
+    try:
+        store_type = int(store_type[0])  # first character only
+    except ValueError:
+        print(f'Error: invalid store type for store {store_num} row {tracker_row}  ... skipping to next row')
+        tracker_row = tracker_row + 1
+        continue
     site_id = f'{store_type}{store_num}'
 
     # get the postcode
