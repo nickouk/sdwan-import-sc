@@ -922,7 +922,18 @@ longlist = []
 while len(postcode_list) > 100:
     postcode_max100 = postcode_list[0:100]
     postcode_result = postcode_api(postcode_max100)
-    postcode_df = pd.json_normalize(postcode_result.json()['result'],sep='_')
+    
+    results_list = postcode_result.json()['result']
+    for item in results_list:
+        if item['result'] is None:
+            # Fallback for terminated/missing postcodes
+            r = requests.get(f"https://api.postcodes.io/postcodes/{item['query']}")
+            if r.status_code == 404:
+                data = r.json()
+                if 'terminated' in data and data['terminated'] is not None:
+                    item['result'] = data['terminated']
+
+    postcode_df = pd.json_normalize(results_list, sep='_')
     # update the csv dictionary with the lat and long values returned by the API
     latlist = latlist + (postcode_df['result_latitude'].to_list())
     longlist = longlist+ (postcode_df['result_longitude'].to_list())
@@ -931,9 +942,21 @@ while len(postcode_list) > 100:
 
 if len(postcode_list) > 0:
     postcode_result = postcode_api(postcode_list)
-    postcode_df = pd.json_normalize(postcode_result.json()['result'],sep='_')
+    
+    results_list = postcode_result.json()['result']
+    for item in results_list:
+        if item['result'] is None:
+            # Fallback for terminated/missing postcodes
+            r = requests.get(f"https://api.postcodes.io/postcodes/{item['query']}")
+            if r.status_code == 404:
+                data = r.json()
+                if 'terminated' in data and data['terminated'] is not None:
+                    item['result'] = data['terminated']
+
+    postcode_df = pd.json_normalize(results_list, sep='_')
     latlist = latlist + (postcode_df['result_latitude'].to_list())
     longlist = longlist+ (postcode_df['result_longitude'].to_list())
+
     
 # update the csv dictionary with the lat and long values returned by the API
 vmanage_dict['basic_gpsl_latitude'] = latlist
