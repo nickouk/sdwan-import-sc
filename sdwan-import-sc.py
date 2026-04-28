@@ -977,6 +977,15 @@ if print_array_length is True:
     print()
 df = pd.DataFrame(vmanage_dict)
 
+# check for spaces in the Host Name field
+invalid_hosts = df[df['Host Name'].str.contains(' ', na=False)]
+if not invalid_hosts.empty:
+    print('\n' + '*' * 90)
+    print('WARNING: Host names with spaces detected!')
+    for index, row in invalid_hosts.iterrows():
+        print(f" -> Row {index}: '{row['Host Name']}'")
+    print('*' * 90 + '\n')
+
 # write the dataframe to a csv ready for import into vManage
 try:
     df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
