@@ -32,6 +32,8 @@ from ipwhois import IPWhois
 import pprint
 import ipaddress
 import sys
+import os
+from datetime import datetime
 import re
 import math
 import pickle
@@ -213,10 +215,38 @@ def wan_color(circuit_provider):
 # Open the tracker sheet
 
 try:
-    tracker_wb_obj = openpyxl.load_workbook(
-        '/mnt/c/Users/nick.oneill/Downloads/NOF2025 Rollout tracker.xlsx')
+    tracker_filepath = '/mnt/c/Users/nick.oneill/OneDrive - Maintel Europe Limited/Southern Coops - Rollout docs/NOF2025 Rollout tracker.xlsx'
+    m_time = os.path.getmtime(tracker_filepath)
+    last_updated = datetime.fromtimestamp(m_time).strftime('%Y-%m-%d %H:%M:%S')
+    
+    timestamp_file = '.last_run_timestamp'
+    if os.path.exists(timestamp_file):
+        with open(timestamp_file, 'r') as f:
+            prev_time = f.read().strip()
+        if prev_time == str(m_time):
+            print('-' * 80)
+            print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+            print('WARNING: The tracker file has not changed since the last run.')
+            print('-' * 80)
+            choice = input('Do you want to continue? (y/n): ')
+            if choice.lower() != 'y':
+                print('Exiting...\n')
+                sys.exit()
+        else:
+            print('-' * 80)
+            print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+            print('-' * 80 + '\n')
+    else:
+        print('-' * 80)
+        print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+        print('-' * 80 + '\n')
+        
+    with open(timestamp_file, 'w') as f:
+        f.write(str(m_time))
+
+    tracker_wb_obj = openpyxl.load_workbook(tracker_filepath)
 except FileNotFoundError:
-    print('*' * 120,'\nError: NOF2025 Rollout tracker.xlsx file not found - please download from Sharepoint and re-run the script\n','*' * 120)
+    print('*' * 120,'\nError: NOF2025 Rollout tracker.xlsx file not found - please check the folder location\n','*' * 120)
     sys.exit()
 
 tracker_sheet_obj = tracker_wb_obj.active
@@ -988,9 +1018,9 @@ if not invalid_hosts.empty:
 
 # write the dataframe to a csv ready for import into vManage
 try:
-    df.to_csv('/mnt/c/Users/nick.oneill/Downloads/vmanage-import-sc.csv', index=False)
+    df.to_csv('/mnt/c/Users/nick.oneill/OneDrive - Maintel Europe Limited/Southern Coops - Rollout docs/vmanage-import-sc.csv', index=False)
 except PermissionError:
-    print('*' * 120,'\nError: vmanage-import-sc.csv is open in another application - please close and re-run the script\n','*' * 120)
+    print('*' * 120,'\nError: vmanage-import-sc.csv is open in another application or by another user - please close and re-run the script\n','*' * 120)
     exit()
 
 # all done
