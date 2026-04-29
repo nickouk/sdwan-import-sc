@@ -217,7 +217,13 @@ def wan_color(circuit_provider):
 try:
     tracker_filepath = '/mnt/c/Users/nick.oneill/OneDrive - Maintel Europe Limited/Southern Coops - Rollout docs/NOF2025 Rollout tracker.xlsx'
     m_time = os.path.getmtime(tracker_filepath)
-    last_updated = datetime.fromtimestamp(m_time).strftime('%Y-%m-%d %H:%M:%S')
+    last_updated_dt = datetime.fromtimestamp(m_time)
+    last_updated = last_updated_dt.strftime('%Y-%m-%d %H:%M:%S')
+    
+    current_time_dt = datetime.now()
+    current_time = current_time_dt.strftime('%Y-%m-%d %H:%M:%S')
+    time_diff = current_time_dt - last_updated_dt
+    time_diff_str = str(time_diff).split('.')[0]  # Remove microseconds for cleaner output
     
     timestamp_file = '.last_run_timestamp'
     if os.path.exists(timestamp_file):
@@ -226,6 +232,8 @@ try:
         if prev_time == str(m_time):
             print('-' * 80)
             print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+            print(f'Current time:                                  {current_time}')
+            print(f'Time difference:                               {time_diff_str}')
             print('WARNING: The tracker file has not changed since the last run.')
             print('-' * 80)
             choice = input('Do you want to continue? (y/n): ')
@@ -235,10 +243,14 @@ try:
         else:
             print('-' * 80)
             print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+            print(f'Current time:                                  {current_time}')
+            print(f'Time difference:                               {time_diff_str}')
             print('-' * 80 + '\n')
     else:
         print('-' * 80)
         print(f'NOF2025 Rollout tracker.xlsx was last updated: {last_updated}')
+        print(f'Current time:                                  {current_time}')
+        print(f'Time difference:                               {time_diff_str}')
         print('-' * 80 + '\n')
         
     with open(timestamp_file, 'w') as f:
@@ -445,7 +457,7 @@ while tracker_row <= max_row:
     router1_serial = sanatise_serial(router1_serial)
 
     if router1_serial == 'NONE' or router1_serial == '':
-        print(f'Error: missing router 1 serial number for store {store_num} row {tracker_row}  ... skipping to next row')
+        #print(f'Error: missing router 1 serial number for store {store_num} row {tracker_row}  ... skipping to next row')
         tracker_row = tracker_row + 1
         continue
   
@@ -538,7 +550,7 @@ while tracker_row <= max_row:
         # get managment IP address for router 2
         router2_mgmt_ip = str(tracker_sheet_obj.cell(row=tracker_row, column=router2_mgmt_ip_col).value)
         if router2_mgmt_ip == 'None' or router2_mgmt_ip == '':
-            print(f'Error: missing management IP address for router 2 for store {store_num} row {tracker_row}  ... skipping to next row')
+            #print(f'Error: missing management IP address for router 2 for store {store_num} row {tracker_row}  ... skipping to next row')
             tracker_row = tracker_row + 1
             continue
 
@@ -576,7 +588,7 @@ while tracker_row <= max_row:
     try:
         router1_mgmt_ip = ipaddress.ip_network(router1_mgmt_ip, strict=False)
     except ValueError:
-        print(f'Error: invalid management IP address for router 1 for store {store_num} row {tracker_row}  ... skipping to next row')
+        #print(f'Error: invalid management IP address for router 1 for store {store_num} row {tracker_row}  ... skipping to next row')
         tracker_row = tracker_row + 1
         continue
 
