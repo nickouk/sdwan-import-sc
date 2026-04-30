@@ -579,6 +579,12 @@ while tracker_row <= max_row:
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
 
+        if circuit2_provider == 'MAINTEL-BT' and not circuit2_ppp_name.startswith('SCOOP-DIA-BT-MAINTEL-ISP'):
+            print(f'Warning: Circuit 2 provider is MAINTEL-BT but username does not begin with SCOOP-DIA-BT-MAINTEL-ISP for store {store_num} row {tracker_row}')
+            
+        if circuit2_provider == 'MAINTEL-PXC' and not circuit2_ppp_name.startswith('SCOOP-DIA-PXC-MAINTEL-ISP'):
+            print(f'Warning: Circuit 2 provider is MAINTEL-PXC but username does not begin with SCOOP-DIA-PXC-MAINTEL-ISP for store {store_num} row {tracker_row}')
+
         # we need to duplicate the postcode for router 2 which is not optimal but works for now
         postcode_list.append(postcode)
 
@@ -614,6 +620,12 @@ while tracker_row <= max_row:
         print(f'Warning: missing PPPoE name AND circuit not set as BT for circuit 1 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
+
+    if circuit1_provider == 'MAINTEL-BT' and not circuit1_ppp_name.startswith('SCOOP-DIA-BT-MAINTEL-ISP'):
+        print(f'Warning: Circuit 1 provider is MAINTEL-BT but username does not begin with SCOOP-DIA-BT-MAINTEL-ISP for store {store_num} row {tracker_row}')
+
+    if circuit1_provider == 'MAINTEL-PXC' and not circuit1_ppp_name.startswith('SCOOP-DIA-PXC-MAINTEL-ISP'):
+        print(f'Warning: Circuit 1 provider is MAINTEL-PXC but username does not begin with SCOOP-DIA-PXC-MAINTEL-ISP for store {store_num} row {tracker_row}')
 
     # get provision port status
     provision_port_disable = str(tracker_sheet_obj.cell(row=tracker_row, column=provision_port_disable_col).value)
