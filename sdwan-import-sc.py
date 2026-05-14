@@ -696,9 +696,9 @@ while tracker_row <= max_row:
     
     for subnet in store_subnets:
         if subnet in unique_subnets:
-            print(f'Error: Duplicate subnet {subnet} found for store {store_num} row {tracker_row}  ... ABORTED - Please correct and re-run')
-            tracker_row = tracker_row + 1
-            sys.exit()
+            print(f'Error: ***WARNING*** Duplicate subnet {subnet} found for store {store_num} row {tracker_row}  ... Please correct and re-run')
+            #tracker_row = tracker_row + 1
+            #sys.exit()
         else:
             unique_subnets.add(subnet)
 
