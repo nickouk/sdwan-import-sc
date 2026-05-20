@@ -575,7 +575,7 @@ while tracker_row <= max_row:
             circuit2_ppp_pwd = 'dummy'
 
         if circuit2_ppp_name == 'None':
-            print(f'Warning: missing PPPoE name for circuit 2 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
+            #print(f'Warning: missing PPPoE name for circuit 2 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
             circuit2_ppp_name = 'dummy@bband1.com'
             circuit2_ppp_pwd = 'dummy'
 
@@ -605,6 +605,10 @@ while tracker_row <= max_row:
 
     # get provider for circuit 1
     circuit1_provider = str(tracker_sheet_obj.cell(row=tracker_row, column=circuit1_provider_col).value).upper()
+    if circuit1_provider == 'NONE' or circuit1_provider == '':
+        #print(f'Error: missing circuit 1 provider for store {store_num} row {tracker_row}  ... skipping to next row')
+        tracker_row = tracker_row + 1
+        continue
     #router1_wan_color = wan_color(circuit1_provider)
     router1_wan_color = 'blue' # default router 1 as some carrier migrations demand PXC + PXC intially which breaks the config is the same color is used for both circuits
 
@@ -617,7 +621,7 @@ while tracker_row <= max_row:
         circuit1_ppp_pwd = 'dummy'
     
     if circuit1_ppp_name == 'None':
-        print(f'Warning: missing PPPoE name AND circuit not set as BT for circuit 1 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
+        #print(f'Warning: missing PPPoE name AND circuit not set as BT for circuit 1 for store {store_num} row {tracker_row}  ... defaulting to dummy BT details')
         circuit1_ppp_name = 'dummy@bband1.com'
         circuit1_ppp_pwd = 'dummy'
 
