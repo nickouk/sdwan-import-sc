@@ -707,7 +707,7 @@ while tracker_row <= max_row:
         #vlan20_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+200}.{vlan60_oct3}.128/25')
         #vlan31_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+220}.{vlan60_oct3}.0/28')
         #vlan101_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+220}.{vlan60_oct3}.224/27')
-        #store_subnets = [str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan101_ipv4), str(vlan2_ipv4)]
+        store_subnets = [str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan101_ipv4), str(vlan2_ipv4)]
         #print(f'Store {store_num} Type {store_type} generated subnets:')
         #print("-" * 40)
         #print(f'VLAN 60: {vlan60_ipv4}')
