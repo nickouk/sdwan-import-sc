@@ -692,11 +692,29 @@ while tracker_row <= max_row:
     # checks for Vlan 42 - Wesley Media (not required as not globally significant - vrf 400)
     # checks for Vlan 192 - Cremators (not required as not globally significant - vrf 400)
 
+    
+
     if store_type == 3 or store_type == 4:
         store_subnets = [str(vlan10_ipv4), str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan70_ipv4), str(vlan2_ipv4)]
     
     if store_type == 5 or store_type == 6:
-        store_subnets = [str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan101_ipv4), str(vlan2_ipv4)]
+        # ELS ranges are generated differently to avoid a clash with Retail and Welcome store types
+        # vlan60 is learnt from the tracker sheet and will used as the seed subnet to generate the rest of the subnets for type 5 and type 6 ELS Lite and ELS
+        #vlan60_oct1 = vlan60_ipv4.network_address.packed[0]
+        #vlan60_oct2 = vlan60_ipv4.network_address.packed[1]
+        #vlan60_oct3 = vlan60_ipv4.network_address.packed[2]
+        #vlan60_oct4 = vlan60_ipv4.network_address.packed[3]
+        #vlan20_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+200}.{vlan60_oct3}.128/25')
+        #vlan31_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+220}.{vlan60_oct3}.0/28')
+        #vlan101_ipv4 = ipaddress.ip_network(f'{vlan60_oct1}.{(vlan60_oct2)+220}.{vlan60_oct3}.224/27')
+        #store_subnets = [str(vlan20_ipv4), str(vlan31_ipv4), str(vlan60_ipv4), str(vlan101_ipv4), str(vlan2_ipv4)]
+        #print(f'Store {store_num} Type {store_type} generated subnets:')
+        #print("-" * 40)
+        #print(f'VLAN 60: {vlan60_ipv4}')
+        #print(f'VLAN 20: {vlan20_ipv4}')
+        #print(f'VLAN 31: {vlan31_ipv4}')
+        #print(f'VLAN 101: {vlan101_ipv4}')
+        #print('\n')
     
     for subnet in store_subnets:
         if subnet in unique_subnets:
