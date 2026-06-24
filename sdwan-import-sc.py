@@ -199,6 +199,7 @@ def sanatise_serial(serial):
 def wan_color(circuit_provider):
 
     # Function to return wan color based on circuit provider
+    # !NOTE! this is no longer used as R1 defaults to blue and R2 defaults green !!!
       
     if circuit_provider == 'BT' or circuit_provider == 'MAINTEL-BT':
         return 'blue'
